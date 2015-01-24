@@ -1,9 +1,9 @@
 package server
 
 type Dispatcher struct {
-	Handlers interface{}
+	Handlers *interface{}
 }
 
-func NewDispatcher(handlers interface{}) *Dispatcher {
+func NewDispatcher(handlers *interface{}) *Dispatcher {
 	return &Dispatcher{Handlers: handlers}
 }

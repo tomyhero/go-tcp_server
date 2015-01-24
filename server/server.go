@@ -18,7 +18,7 @@ type Server struct {
 	dispatcher *Dispatcher
 }
 
-func (s *Server) Setup(handlers interface{}) {
+func (s *Server) Setup(handlers *interface{}) {
 	s.dispatcher = NewDispatcher(handlers)
 }
 
