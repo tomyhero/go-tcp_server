@@ -26,7 +26,11 @@ func NewContext(buf *bytes.Buffer) (*Context, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Context{Req: req}, nil
+	return &Context{Req: req, Res: NewResponse(), Stash: map[string]interface{}{}}, nil
+}
+
+func NewResponse() *Response {
+	return &Response{Header: map[string]interface{}{}, Body: map[string]interface{}{}}
 }
 
 func NewRequest(buf *bytes.Buffer) (*Request, error) {

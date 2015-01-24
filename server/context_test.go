@@ -1,7 +1,7 @@
 package server
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/tomyhero/ore_server/util"
 	"reflect"
@@ -12,6 +12,7 @@ func TestNewContext(t *testing.T) {
 	in := map[string]interface{}{"h": map[string]interface{}{"cmd": "prefix_Echo"}, "b": map[string]interface{}{"text": "Hello World\n"}}
 	buf, _ := util.PackMP(in)
 	c, err := NewContext(buf)
+	fmt.Println(c)
 	assert.Nil(t, err)
 	assert.Equal(t, "prefix_Echo", c.Req.Header["cmd"])
 }
