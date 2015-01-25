@@ -1,9 +1,13 @@
-package server
+package context
 
 import (
 	"bytes"
 	"github.com/tomyhero/ore_server/util"
 )
+
+type IHandler interface {
+	Prefix() string
+}
 
 type Context struct {
 	Req   *Request

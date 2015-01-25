@@ -8,6 +8,7 @@ sv.Run()
 import (
 	//"bytes"
 	"fmt"
+	"github.com/tomyhero/ore_server/context"
 	"net"
 	"os"
 	"reflect"
@@ -20,7 +21,7 @@ type Server struct {
 	dispatcher *Dispatcher
 }
 
-func (s *Server) Setup(handlers []interface{}) {
+func (s *Server) Setup(handlers []context.IHandler) {
 	s.dispatcher = NewDispatcher(handlers)
 }
 

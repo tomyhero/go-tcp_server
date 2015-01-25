@@ -1,16 +1,17 @@
 package server
 
 import (
+	"github.com/tomyhero/ore_server/context"
 	"github.com/tomyhero/ore_server/util"
 	"reflect"
 )
 
 type Dispatcher struct {
-	Handlers []interface{}
+	Handlers []context.IHandler
 	Actions  map[string]reflect.Value
 }
 
-func NewDispatcher(handlers []interface{}) *Dispatcher {
+func NewDispatcher(handlers []context.IHandler) *Dispatcher {
 
 	actions := map[string]reflect.Value{}
 	for _, handler := range handlers {

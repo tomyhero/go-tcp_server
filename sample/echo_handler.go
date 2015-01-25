@@ -2,7 +2,7 @@ package sample
 
 import (
 	"fmt"
-	"github.com/tomyhero/ore_server/server"
+	"github.com/tomyhero/ore_server/context"
 )
 
 type EchoHandler struct {
@@ -23,7 +23,7 @@ func (h *HookHandler) Initialize() {
 func (h *HookHandler) Finalize() {
 }
 
-func (h *EchoHandler) ActionEcho(c *server.Context) (*server.Context, error) {
+func (h *EchoHandler) ActionEcho(c *context.Context) (*context.Context, error) {
 	//c.Res.Body = c.Req.Body
 	return c, nil
 }
