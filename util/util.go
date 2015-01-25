@@ -5,20 +5,23 @@ import (
 	"fmt"
 	"gopkg.in/vmihailenco/msgpack.v2"
 	"reflect"
-	//"regexp"
+	"regexp"
+	"strings"
 )
 
-func GetMethods(in interface{}) map[string]reflect.Value {
-	prefix := "prefix_"
-	actions := map[string]reflect.Value{}
+func GetMethods(actions map[string]reflect.Value, in interface{}) {
 	t := reflect.TypeOf(in)
+	prefix := reflect.ValueOf(in).MethodByName("Prefix").Call([]reflect.Value{})[0]
 	for i := 0; i < t.NumMethod(); i++ {
 		method := t.Method(i)
+		match, _ := regexp.MatchString("^Action", method.Name)
+		if !match {
+			continue
+		}
 		action := reflect.ValueOf(in).MethodByName(method.Name)
-		field_name := prefix + method.Name
+		field_name := fmt.Sprintf("%s_%s", prefix, strings.TrimLeft(method.Name, "Action"))
 		actions[field_name] = action
 	}
-	return actions
 }
 
 func PackMP(in map[string]interface{}) (*bytes.Buffer, error) {
@@ -78,5 +81,6 @@ func ValidateData(data map[string]interface{}) error {
 				return fmt.Errorf("header.cmd must be string")
 		}
 	*/
+
 	return nil
 }

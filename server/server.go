@@ -6,9 +6,11 @@ sv.Run()
 */
 
 import (
+	//"bytes"
 	"fmt"
 	"net"
 	"os"
+	"reflect"
 )
 
 type Server struct {
@@ -18,7 +20,7 @@ type Server struct {
 	dispatcher *Dispatcher
 }
 
-func (s *Server) Setup(handlers *interface{}) {
+func (s *Server) Setup(handlers []interface{}) {
 	s.dispatcher = NewDispatcher(handlers)
 }
 
@@ -35,20 +37,35 @@ func (s *Server) Run() error {
 			fmt.Println("Error Accepting", err.Error())
 			os.Exit(1)
 		}
-		go handle(conn)
+		go handle(s.dispatcher, conn)
 	}
 }
 
 // Handles incoming requests.
-func handle(conn net.Conn) {
+func handle(dispatcher *Dispatcher, conn net.Conn) {
 	for {
-		// Make a buffer to hold incoming data.
-		buf := make([]byte, 1024)
-		// Read the incoming connection into the buffer.
-		_, err := conn.Read(buf)
+		b := make([]byte, 1024)
+		_, err := conn.Read(b)
 		if err != nil {
 			fmt.Println("Error reading:", err.Error())
 		}
-		fmt.Println(string(buf))
+		fmt.Println(string(b))
+
+		action, find := dispatcher.Actions["echo_Test"]
+
+		if find {
+			action.Call([]reflect.Value{})
+		} else {
+
+		}
+
+		/*
+			buf := bytes.NewBuffer(b)
+			c, err := NewContext(buf)
+			if err != nil {
+				fmt.Println("create context", err)
+			}
+		*/
+
 	}
 }

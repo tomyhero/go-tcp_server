@@ -1,7 +1,8 @@
 package sample
 
 import (
-	. "github.com/tomyhero/ore_server/server"
+	"fmt"
+	"github.com/tomyhero/ore_server/server"
 )
 
 type EchoHandler struct {
@@ -22,7 +23,15 @@ func (h *HookHandler) Initialize() {
 func (h *HookHandler) Finalize() {
 }
 
-func (h *EchoHandler) Echo(c *Context) (*Context, error) {
+func (h *EchoHandler) ActionEcho(c *server.Context) (*server.Context, error) {
 	//c.Res.Body = c.Req.Body
 	return c, nil
+}
+
+func (h *EchoHandler) ActionTest() {
+	fmt.Println("Hello World")
+}
+
+func (h *EchoHandler) Prefix() string {
+	return "echo"
 }
