@@ -50,7 +50,9 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 		if err != nil {
 			fmt.Println("Error reading:", err.Error())
 		}
-		fmt.Println(string(b))
+
+		// Authorize or Login
+		// HOOK_BEFORE
 
 		action, find := dispatcher.Actions["echo_Test"]
 
@@ -67,6 +69,8 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 				fmt.Println("create context", err)
 			}
 		*/
+
+		// HOOK_AFTER
 
 	}
 }
