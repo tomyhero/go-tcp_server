@@ -44,18 +44,22 @@ func (s *Server) Run() error {
 
 // Handles incoming requests.
 func handle(dispatcher *Dispatcher, conn net.Conn) {
+
+	// when out of for loop, close the connection.
+	defer conn.Close()
+
 	for {
 		cdata := CData{SerializorType: SERIALIZOR_TYPE_MESSAGE_PACK}
 		data, err := cdata.Receive(conn)
 		if err != nil {
 			fmt.Println("receive cdata", err)
-			continue
+			break
 		}
 
 		c, err := context.NewContext(data)
 		if err != nil {
 			fmt.Println("create context", err)
-			continue
+			break
 		}
 
 		// Authorize or Login

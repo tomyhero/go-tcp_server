@@ -10,6 +10,7 @@ import (
 
 const (
 	SERIALIZOR_TYPE_MESSAGE_PACK = 0
+	SERIALIZOR_TYPE_JSON         = 1
 )
 
 type CData struct {
@@ -45,7 +46,14 @@ func (c CData) Receive(conn net.Conn) (data map[string]interface{}, err error) {
 		if err != nil {
 			fmt.Println(err)
 		}
+	} else if c.SerializorType == SERIALIZOR_TYPE_JSON {
+		serializer := serializer.JSON{}
+		data, err = serializer.Deserialize(buf)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
+
 	return data, err
 }
 
