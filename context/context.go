@@ -2,7 +2,7 @@ package context
 
 import (
 	"bytes"
-	"github.com/tomyhero/ore_server/util"
+	"github.com/tomyhero/ore_server/cdata"
 )
 
 type IHandler interface {
@@ -38,7 +38,8 @@ func NewResponse() *Response {
 }
 
 func NewRequest(buf *bytes.Buffer) (*Request, error) {
-	data, err := util.UnpackMP(buf)
+	cdata := cdata.MessagePack{}
+	data, err := cdata.Decode(buf)
 	if err != nil {
 		return nil, err
 	}
