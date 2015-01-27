@@ -3,27 +3,21 @@ package context
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/tomyhero/ore_server/cdata"
 	"reflect"
 	"testing"
 )
 
 func TestNewContext(t *testing.T) {
-	cdata := cdata.MessagePack{}
-	in := map[string]interface{}{"h": map[string]interface{}{"cmd": "prefix_Echo"}, "b": map[string]interface{}{"text": "Hello World\n"}}
-	buf, _ := cdata.Encode(in)
-	c, err := NewContext(buf)
+	data := map[string]interface{}{"h": map[string]interface{}{"cmd": "prefix_Echo"}, "b": map[string]interface{}{"text": "Hello World\n"}}
+	c, err := NewContext(data)
 	fmt.Println(c)
 	assert.Nil(t, err)
 	assert.Equal(t, "prefix_Echo", c.Req.Header["cmd"])
 }
 
 func TestNewRequest(t *testing.T) {
-	cdata := cdata.MessagePack{}
 	data := map[string]interface{}{"h": map[string]interface{}{"cmd": "prefix_Echo"}, "b": map[string]interface{}{"text": "Hello World\n", "id": []int{1, 2, 3}}}
-	buf, err := cdata.Encode(data)
-	assert.Nil(t, err)
-	req, err := NewRequest(buf)
+	req, err := NewRequest(data)
 	assert.Nil(t, err)
 	assert.Equal(t, "prefix_Echo", req.Header["cmd"])
 

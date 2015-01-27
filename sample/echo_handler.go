@@ -2,17 +2,22 @@ package sample
 
 import (
 	"fmt"
+	"github.com/tomyhero/ore_server/authorizer"
 	"github.com/tomyhero/ore_server/context"
 )
 
 type EchoHandler struct {
-	HookHandler    interface{}
-	AuthrizeHander interface{}
+	HookHandler interface{}
+	Authorizer  authorizer.IAuthorizer
+}
+
+func (h *EchoHandler) Prefix() string {
+	return "echo"
 }
 
 func NewEchoHandler() *EchoHandler {
 	//&EchoHandler{HookHandler: HookHandler{}, AuthrizeHander: auth.NillAutuer{}}
-	return &EchoHandler{}
+	return &EchoHandler{Authorizer: authorizer.PlainPassword{Password: "1111"}}
 }
 
 type HookHandler struct{}
@@ -30,8 +35,4 @@ func (h *EchoHandler) ActionEcho(c *context.Context) (*context.Context, error) {
 
 func (h *EchoHandler) ActionTest() {
 	fmt.Println("Hello World")
-}
-
-func (h *EchoHandler) Prefix() string {
-	return "echo"
 }

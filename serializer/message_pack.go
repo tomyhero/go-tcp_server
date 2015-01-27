@@ -1,4 +1,4 @@
-package cdata
+package serializer
 
 import (
 	"bytes"
@@ -8,14 +8,14 @@ import (
 
 type MessagePack struct{}
 
-func (m MessagePack) Encode(in map[string]interface{}) (*bytes.Buffer, error) {
+func (m MessagePack) Serialize(in map[string]interface{}) (*bytes.Buffer, error) {
 	buf := &bytes.Buffer{}
 	enc := msgpack.NewEncoder(buf)
 	enc.Encode(in)
 	return buf, nil
 }
 
-func (m MessagePack) Decode(buf *bytes.Buffer) (map[string]interface{}, error) {
+func (m MessagePack) Deserialize(buf *bytes.Buffer) (map[string]interface{}, error) {
 	dec := msgpack.NewDecoder(buf)
 	dec.DecodeMapFunc = func(d *msgpack.Decoder) (interface{}, error) {
 		n, err := d.DecodeMapLen()

@@ -45,10 +45,17 @@ func (s *Server) Run() error {
 // Handles incoming requests.
 func handle(dispatcher *Dispatcher, conn net.Conn) {
 	for {
-		b := make([]byte, 1024)
-		_, err := conn.Read(b)
+		cdata := CData{SerializorType: SERIALIZOR_TYPE_MESSAGE_PACK}
+		data, err := cdata.Receive(conn)
 		if err != nil {
-			fmt.Println("Error reading:", err.Error())
+			fmt.Println("receive cdata", err)
+			continue
+		}
+
+		c, err := context.NewContext(data)
+		if err != nil {
+			fmt.Println("create context", err)
+			continue
 		}
 
 		// Authorize or Login
@@ -57,18 +64,10 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 		action, find := dispatcher.Actions["echo_Test"]
 
 		if find {
-			action.Call([]reflect.Value{})
+			action.Call([]reflect.Value{reflect.ValueOf(c)})
 		} else {
 
 		}
-
-		/*
-			buf := bytes.NewBuffer(b)
-			c, err := NewContext(buf)
-			if err != nil {
-				fmt.Println("create context", err)
-			}
-		*/
 
 		// HOOK_AFTER
 

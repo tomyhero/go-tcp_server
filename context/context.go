@@ -1,10 +1,5 @@
 package context
 
-import (
-	"bytes"
-	"github.com/tomyhero/ore_server/cdata"
-)
-
 type IHandler interface {
 	Prefix() string
 }
@@ -25,8 +20,8 @@ type Response struct {
 	Body   map[string]interface{}
 }
 
-func NewContext(buf *bytes.Buffer) (*Context, error) {
-	req, err := NewRequest(buf)
+func NewContext(data map[string]interface{}) (*Context, error) {
+	req, err := NewRequest(data)
 	if err != nil {
 		return nil, err
 	}
@@ -37,11 +32,6 @@ func NewResponse() *Response {
 	return &Response{Header: map[string]interface{}{}, Body: map[string]interface{}{}}
 }
 
-func NewRequest(buf *bytes.Buffer) (*Request, error) {
-	cdata := cdata.MessagePack{}
-	data, err := cdata.Decode(buf)
-	if err != nil {
-		return nil, err
-	}
+func NewRequest(data map[string]interface{}) (*Request, error) {
 	return &Request{Header: data["h"].(map[string]interface{}), Body: data["b"].(map[string]interface{})}, nil
 }
