@@ -35,6 +35,12 @@ func NewContext(data map[string]interface{}) (*Context, error) {
 func NewResponse() *Response {
 	return &Response{Header: map[string]interface{}{}, Body: map[string]interface{}{}}
 }
+func (r *Response) GetData() map[string]interface{} {
+	data := map[string]interface{}{}
+	data["h"] = r.Header
+	data["b"] = r.Body
+	return data
+}
 
 func NewRequest(data map[string]interface{}) (*Request, error) {
 	return &Request{Header: data["h"].(map[string]interface{}), Body: data["b"].(map[string]interface{})}, nil

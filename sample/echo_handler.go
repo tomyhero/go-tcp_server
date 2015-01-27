@@ -29,7 +29,7 @@ func (h *HookHandler) Finalize() {
 }
 
 func (h *EchoHandler) ActionEcho(c *context.Context) (*context.Context, error) {
-	//c.Res.Body = c.Req.Body
-	fmt.Println("Echo Echo!")
+	c.Res.Body = c.Req.Body
+	fmt.Println(c, "Echo Echo!")
 	return c, nil
 }

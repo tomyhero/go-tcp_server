@@ -72,8 +72,10 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 		} else {
 
 		}
-
-		// HOOK_AFTER
-
+		err = cdata.Send(conn, c.Res.GetData())
+		if err != nil {
+			fmt.Println("send fail", err)
+			break
+		}
 	}
 }

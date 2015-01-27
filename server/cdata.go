@@ -57,6 +57,23 @@ func (c CData) Receive(conn net.Conn) (data map[string]interface{}, err error) {
 	return data, err
 }
 
-func (c CData) Send(conn net.Conn) {
+func (c CData) Send(conn net.Conn, data map[string]interface{}) error {
 
+	if c.SerializorType == SERIALIZOR_TYPE_MESSAGE_PACK {
+		serializer := serializer.MessagePack{}
+		buf, err := serializer.Serialize(data)
+		if err != nil {
+			return err
+		}
+		conn.Write(buf.Bytes())
+	} else if c.SerializorType == SERIALIZOR_TYPE_JSON {
+		serializer := serializer.JSON{}
+		buf, err := serializer.Serialize(data)
+		if err != nil {
+			return err
+		}
+		conn.Write(buf.Bytes())
+	}
+
+	return nil
 }

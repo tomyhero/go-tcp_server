@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/tomyhero/ore_server/serializer"
 	"net"
@@ -25,6 +26,6 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(res)
+	fmt.Println(serialize.Deserialize(bytes.NewBufferString(res)))
 
 }
