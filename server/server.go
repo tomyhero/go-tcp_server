@@ -1,14 +1,10 @@
 package server
 
-/*
-sv := Server{"Port":8080,"Handlers":{FooHandler,BooHandler}}
-sv.Run()
-*/
-
 import (
 	//"bytes"
 	"fmt"
 	"github.com/tomyhero/ore_server/context"
+	"io"
 	"net"
 	"os"
 	"reflect"
@@ -49,11 +45,17 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 	defer conn.Close()
 
 	for {
+		fmt.Println("start")
 		cdata := CData{SerializorType: SERIALIZOR_TYPE_MESSAGE_PACK}
 		data, err := cdata.Receive(conn)
 		if err != nil {
-			fmt.Println("receive cdata", err)
-			break
+			if err == io.EOF {
+				fmt.Println("client dissconected")
+				break
+			} else {
+				fmt.Println("receive cdata", err)
+				break
+			}
 		}
 
 		c, err := context.NewContext(data)
@@ -77,5 +79,6 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 			fmt.Println("send fail", err)
 			break
 		}
+		fmt.Println("end")
 	}
 }

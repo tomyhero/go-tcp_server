@@ -36,7 +36,7 @@ func (c CData) Receive(conn net.Conn) (data map[string]interface{}, err error) {
 	b := make([]byte, 1024) // XXX
 	_, err = conn.Read(b)
 	if err != nil {
-		fmt.Println("Error reading:", err.Error())
+		return nil, err
 	}
 	buf := bytes.NewBuffer(b)
 
