@@ -65,8 +65,8 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 		// Authorize or Login
 		// HOOK_BEFORE
 
-		action, find := dispatcher.Actions["echo_Test"]
-
+		action, find := dispatcher.Actions[c.Req.GetCMD()]
+		fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.Actions, action, find)
 		if find {
 			action.Call([]reflect.Value{reflect.ValueOf(c)})
 		} else {

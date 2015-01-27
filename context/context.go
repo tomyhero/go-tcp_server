@@ -15,6 +15,10 @@ type Request struct {
 	Body   map[string]interface{}
 }
 
+func (r *Request) GetCMD() string {
+	return r.Header["cmd"].(string)
+}
+
 type Response struct {
 	Header map[string]interface{}
 	Body   map[string]interface{}

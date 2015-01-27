@@ -30,9 +30,6 @@ func (h *HookHandler) Finalize() {
 
 func (h *EchoHandler) ActionEcho(c *context.Context) (*context.Context, error) {
 	//c.Res.Body = c.Req.Body
+	fmt.Println("Echo Echo!")
 	return c, nil
-}
-
-func (h *EchoHandler) ActionTest() {
-	fmt.Println("Hello World")
 }
