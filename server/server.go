@@ -64,16 +64,32 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 			break
 		}
 
-		// Authorize or Login
-		// HOOK_BEFORE
-
-		action, find := dispatcher.Actions[c.Req.GetCMD()]
-		fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.Actions, action, find)
-		if find {
-			action.Call([]reflect.Value{reflect.ValueOf(c)})
+		loginAction, onLogin := dispatcher.LoginActions[c.Req.GetCMD()]
+		// do login
+		if onLogin {
+			fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.LoginActions, loginAction)
+			ok := loginAction.Call([]reflect.Value{reflect.ValueOf(c)})[0].Bool()
+			if ok {
+				c.Res.Header["CODE"] = 200
+			} else {
+				c.Res.Header["CODE"] = 301 // XXX
+			}
+			// do auth action 
 		} else {
 
+			action, find := dispatcher.Actions[c.Req.GetCMD()]
+			fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.Actions, action, find)
+			if find {
+				if dispatcher.ExecAuth(c, c.Req.GetCMD()) {
+					action.Call([]reflect.Value{reflect.ValueOf(c)})
+				} else {
+					fmt.Println("Login Fail")
+				}
+			} else {
+				fmt.Println("Command Not Found")
+			}
 		}
+
 		err = cdata.Send(conn, c.Res.GetData())
 		if err != nil {
 			fmt.Println("send fail", err)

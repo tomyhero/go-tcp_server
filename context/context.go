@@ -2,6 +2,12 @@ package context
 
 type IHandler interface {
 	Prefix() string
+	AuthorizerHandler() IAuthorizer
+}
+
+type IAuthorizer interface {
+	Login(c *Context) bool
+	Auth(c *Context) bool
 }
 
 type Context struct {

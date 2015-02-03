@@ -8,11 +8,14 @@ import (
 
 type EchoHandler struct {
 	HookHandler interface{}
-	Authorizer  authorizer.IAuthorizer
+	Authorizer  context.IAuthorizer
 }
 
 func (h *EchoHandler) Prefix() string {
 	return "echo"
+}
+func (h *EchoHandler) AuthorizerHandler() context.IAuthorizer {
+	return h.Authorizer
 }
 
 func NewEchoHandler() *EchoHandler {
