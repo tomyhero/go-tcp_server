@@ -38,3 +38,15 @@ func NewDispatcher(handlers []context.IHandler) *Dispatcher {
 	}
 	return &Dispatcher{Handlers: handlers, mapHandlers: mapHandlers, Actions: actions, LoginActions: loginActions}
 }
+
+func (d *Dispatcher) BeforeExecute(c *context.Context, cmd string) {
+	prefix := strings.Split(cmd, "_")[0]
+	handler := d.mapHandlers[prefix]
+	handler.BeforeExecuteHandler(c)
+}
+
+func (d *Dispatcher) AfterExecute(c *context.Context, cmd string) {
+	prefix := strings.Split(cmd, "_")[0]
+	handler := d.mapHandlers[prefix]
+	handler.AfterExecuteHandler(c)
+}

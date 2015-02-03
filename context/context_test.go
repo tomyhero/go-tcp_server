@@ -8,18 +8,18 @@ import (
 )
 
 func TestNewContext(t *testing.T) {
-	data := map[string]interface{}{"h": map[string]interface{}{"cmd": "prefix_Echo"}, "b": map[string]interface{}{"text": "Hello World\n"}}
+	data := map[string]interface{}{"H": map[string]interface{}{"CMD": "prefix_Echo"}, "B": map[string]interface{}{"text": "Hello World\n"}}
 	c, err := NewContext(data)
 	fmt.Println(c)
 	assert.Nil(t, err)
-	assert.Equal(t, "prefix_Echo", c.Req.Header["cmd"])
+	assert.Equal(t, "prefix_Echo", c.Req.Header["CMD"])
 }
 
 func TestNewRequest(t *testing.T) {
-	data := map[string]interface{}{"h": map[string]interface{}{"cmd": "prefix_Echo"}, "b": map[string]interface{}{"text": "Hello World\n", "id": []int{1, 2, 3}}}
+	data := map[string]interface{}{"H": map[string]interface{}{"CMD": "prefix_Echo"}, "B": map[string]interface{}{"text": "Hello World\n", "id": []int{1, 2, 3}}}
 	req, err := NewRequest(data)
 	assert.Nil(t, err)
-	assert.Equal(t, "prefix_Echo", req.Header["cmd"])
+	assert.Equal(t, "prefix_Echo", req.Header["CMD"])
 
 	s := reflect.ValueOf(req.Body["id"])
 	ids := make([]int, s.Len())

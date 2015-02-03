@@ -14,7 +14,7 @@ func (a PlainPassword) Login(c *context.Context) bool {
 }
 
 func (a PlainPassword) Auth(c *context.Context) bool {
-	password := c.Req.Header["plain_password"]
+	password := c.Req.Header["AUTH_PLAIN_PASSWORD"]
 	if password == a.Password {
 		return true
 	} else {

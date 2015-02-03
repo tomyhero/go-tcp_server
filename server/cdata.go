@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	CDATA_SIZE                   = 1024 * 2
 	SERIALIZOR_TYPE_MESSAGE_PACK = 0
 	SERIALIZOR_TYPE_JSON         = 1
 )
@@ -33,7 +34,7 @@ func (c CData) Receive(conn net.Conn) (data map[string]interface{}, err error) {
 		}
 	}()
 
-	b := make([]byte, 1024) // XXX
+	b := make([]byte, CDATA_SIZE) // XXX
 	_, err = conn.Read(b)
 	if err != nil {
 		return nil, err

@@ -70,9 +70,9 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 			fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.LoginActions, loginAction)
 			ok := loginAction.Call([]reflect.Value{reflect.ValueOf(c)})[0].Bool()
 			if ok {
-				c.Res.Header["CODE"] = 200
+				c.Res.Header["STATUS"] = context.STATUS_OK
 			} else {
-				c.Res.Header["CODE"] = 301 // XXX
+				c.Res.Header["STATUS"] = context.STATUS_NOT_OK
 			}
 			// do auth action 
 		} else {
@@ -81,12 +81,21 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 			fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.Actions, action, find)
 			if find {
 				if dispatcher.ExecAuth(c, c.Req.GetCMD()) {
+
+					// BEFORE_EXECUTE
+					dispatcher.BeforeExecute(c, c.Req.GetCMD())
+
 					action.Call([]reflect.Value{reflect.ValueOf(c)})
+					c.Res.Header["STATUS"] = context.STATUS_OK
+
+					// AFTER_EXECUTE
+					dispatcher.AfterExecute(c, c.Req.GetCMD())
+
 				} else {
-					fmt.Println("Login Fail")
+					c.Res.Header["STATUS"] = context.STATUS_FORBIDDEN
 				}
 			} else {
-				fmt.Println("Command Not Found")
+				c.Res.Header["STATUS"] = context.STATUS_COMMAND_NOT_FOUND
 			}
 		}
 

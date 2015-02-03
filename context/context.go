@@ -1,8 +1,18 @@
 package context
 
+const (
+	STATUS_NOT_PREPARE       = 0
+	STATUS_OK                = 1
+	STATUS_FORBIDDEN         = 2
+	STATUS_NOT_OK            = 3
+	STATUS_COMMAND_NOT_FOUND = 4
+)
+
 type IHandler interface {
 	Prefix() string
 	AuthorizerHandler() IAuthorizer
+	BeforeExecuteHandler(c *Context)
+	AfterExecuteHandler(c *Context)
 }
 
 type IAuthorizer interface {
@@ -22,7 +32,7 @@ type Request struct {
 }
 
 func (r *Request) GetCMD() string {
-	return r.Header["cmd"].(string)
+	return r.Header["CMD"].(string)
 }
 
 type Response struct {
@@ -39,15 +49,15 @@ func NewContext(data map[string]interface{}) (*Context, error) {
 }
 
 func NewResponse() *Response {
-	return &Response{Header: map[string]interface{}{}, Body: map[string]interface{}{}}
+	return &Response{Header: map[string]interface{}{"STATUS": STATUS_FORBIDDEN}, Body: map[string]interface{}{}}
 }
 func (r *Response) GetData() map[string]interface{} {
 	data := map[string]interface{}{}
-	data["h"] = r.Header
-	data["b"] = r.Body
+	data["H"] = r.Header
+	data["B"] = r.Body
 	return data
 }
 
 func NewRequest(data map[string]interface{}) (*Request, error) {
-	return &Request{Header: data["h"].(map[string]interface{}), Body: data["b"].(map[string]interface{})}, nil
+	return &Request{Header: data["H"].(map[string]interface{}), Body: data["B"].(map[string]interface{})}, nil
 }

@@ -7,8 +7,7 @@ import (
 )
 
 type EchoHandler struct {
-	HookHandler interface{}
-	Authorizer  context.IAuthorizer
+	Authorizer context.IAuthorizer
 }
 
 func (h *EchoHandler) Prefix() string {
@@ -19,16 +18,15 @@ func (h *EchoHandler) AuthorizerHandler() context.IAuthorizer {
 }
 
 func NewEchoHandler() *EchoHandler {
-	//&EchoHandler{HookHandler: HookHandler{}, AuthrizeHander: auth.NillAutuer{}}
 	return &EchoHandler{Authorizer: authorizer.PlainPassword{Password: "1111"}}
 }
 
-type HookHandler struct{}
-
-func (h *HookHandler) Initialize() {
+func (h *EchoHandler) BeforeExecuteHandler(c *context.Context) {
+	fmt.Println("Called BeforeExecuteHandler")
 }
 
-func (h *HookHandler) Finalize() {
+func (h *EchoHandler) AfterExecuteHandler(c *context.Context) {
+	fmt.Println("Called AfterExecuteHandler")
 }
 
 func (h *EchoHandler) ActionEcho(c *context.Context) (*context.Context, error) {

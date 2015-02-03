@@ -16,13 +16,13 @@ func main() {
 	}
 	defer conn.Close()
 
-	doLogin(conn)
+	//doLogin(conn)
 	doEcho(conn)
 
 }
 
 func doLogin(conn net.Conn) {
-	in := map[string]interface{}{"h": map[string]interface{}{"cmd": "echo_login", "plain_password": "1111"}, "b": map[string]interface{}{}}
+	in := map[string]interface{}{"H": map[string]interface{}{"CMD": "echo_login", "plain_password": "1111"}, "B": map[string]interface{}{}}
 	serialize := serializer.MessagePack{}
 	buf, err := serialize.Serialize(in)
 	conn.Write(buf.Bytes())
@@ -36,7 +36,7 @@ func doLogin(conn net.Conn) {
 }
 
 func doEcho(conn net.Conn) {
-	in := map[string]interface{}{"h": map[string]interface{}{"cmd": "echo_Echo"}, "b": map[string]interface{}{"text": "Hello World\n"}}
+	in := map[string]interface{}{"H": map[string]interface{}{"CMD": "echo_Echo", "AUTH_PLAIN_PASSWORD": "1111"}, "B": map[string]interface{}{"text": "Hello World\n"}}
 	serialize := serializer.MessagePack{}
 	buf, err := serialize.Serialize(in)
 	conn.Write(buf.Bytes())

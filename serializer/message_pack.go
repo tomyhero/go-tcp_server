@@ -45,17 +45,17 @@ func (m MessagePack) Deserialize(buf *bytes.Buffer) (map[string]interface{}, err
 // maybe replace to more seriouls one.
 func ValidateData(data map[string]interface{}) error {
 
-	h, ok := data["h"].(map[string]interface{})
+	h, ok := data["H"].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("header section not found")
 	}
 
-	_, ok = data["b"].(map[string]interface{})
+	_, ok = data["B"].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("b section not found")
 	}
 
-	cmd, ok := h["cmd"]
+	cmd, ok := h["CMD"]
 	if !ok {
 		return fmt.Errorf("header.cmd section not found", cmd)
 	}
