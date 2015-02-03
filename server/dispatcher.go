@@ -18,7 +18,7 @@ type Dispatcher struct {
 func (d *Dispatcher) ExecAuth(c *context.Context, cmd string) bool {
 	prefix := strings.Split(cmd, "_")[0]
 	handler := d.mapHandlers[prefix]
-	return handler.AuthorizerHandler().Auth(c)
+	return handler.GetAuthorizer().Auth(c)
 }
 
 func (d *Dispatcher) GetHandler(prefix string) context.IHandler {
@@ -34,7 +34,7 @@ func NewDispatcher(handlers []context.IHandler) *Dispatcher {
 		mapHandlers[handler.Prefix()] = handler
 		util.GetMethods(actions, handler)
 		login_field_name := fmt.Sprintf("%s_login", handler.Prefix())
-		loginActions[login_field_name] = reflect.ValueOf(handler.AuthorizerHandler()).MethodByName("Login")
+		loginActions[login_field_name] = reflect.ValueOf(handler.GetAuthorizer()).MethodByName("Login")
 	}
 	return &Dispatcher{Handlers: handlers, mapHandlers: mapHandlers, Actions: actions, LoginActions: loginActions}
 }
@@ -42,11 +42,11 @@ func NewDispatcher(handlers []context.IHandler) *Dispatcher {
 func (d *Dispatcher) BeforeExecute(c *context.Context, cmd string) {
 	prefix := strings.Split(cmd, "_")[0]
 	handler := d.mapHandlers[prefix]
-	handler.BeforeExecuteHandler(c)
+	handler.HookBeforeExecute(c)
 }
 
 func (d *Dispatcher) AfterExecute(c *context.Context, cmd string) {
 	prefix := strings.Split(cmd, "_")[0]
 	handler := d.mapHandlers[prefix]
-	handler.AfterExecuteHandler(c)
+	handler.HookAfterExecute(c)
 }

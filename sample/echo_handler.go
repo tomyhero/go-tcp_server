@@ -13,7 +13,7 @@ type EchoHandler struct {
 func (h *EchoHandler) Prefix() string {
 	return "echo"
 }
-func (h *EchoHandler) AuthorizerHandler() context.IAuthorizer {
+func (h *EchoHandler) GetAuthorizer() context.IAuthorizer {
 	return h.Authorizer
 }
 
@@ -21,11 +21,11 @@ func NewEchoHandler() *EchoHandler {
 	return &EchoHandler{Authorizer: authorizer.PlainPassword{Password: "1111"}}
 }
 
-func (h *EchoHandler) BeforeExecuteHandler(c *context.Context) {
+func (h *EchoHandler) HookBeforeExecute(c *context.Context) {
 	fmt.Println("Called BeforeExecuteHandler")
 }
 
-func (h *EchoHandler) AfterExecuteHandler(c *context.Context) {
+func (h *EchoHandler) HookAfterExecute(c *context.Context) {
 	fmt.Println("Called AfterExecuteHandler")
 }
 

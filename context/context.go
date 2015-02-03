@@ -10,9 +10,9 @@ const (
 
 type IHandler interface {
 	Prefix() string
-	AuthorizerHandler() IAuthorizer
-	BeforeExecuteHandler(c *Context)
-	AfterExecuteHandler(c *Context)
+	GetAuthorizer() IAuthorizer
+	HookBeforeExecute(c *Context)
+	HookAfterExecute(c *Context)
 }
 
 type IAuthorizer interface {
