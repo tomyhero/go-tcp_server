@@ -15,9 +15,9 @@ func TestNewContext(t *testing.T) {
 	assert.Equal(t, "prefix_Echo", c.Req.Header["CMD"])
 }
 
-func TestNewRequest(t *testing.T) {
+func TestNewCData(t *testing.T) {
 	data := map[string]interface{}{"H": map[string]interface{}{"CMD": "prefix_Echo"}, "B": map[string]interface{}{"text": "Hello World\n", "id": []int{1, 2, 3}}}
-	req, err := NewRequest(data)
+	req, err := NewCData(data)
 	assert.Nil(t, err)
 	assert.Equal(t, "prefix_Echo", req.Header["CMD"])
 

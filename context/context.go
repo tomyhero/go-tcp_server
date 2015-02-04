@@ -1,7 +1,6 @@
 package context
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -28,47 +27,24 @@ type IAuthorizer interface {
 }
 
 type Context struct {
-	Req     *Request
-	Res     *Response
+	Req     *CData
+	Res     *CData
 	Stash   map[string]interface{}
 	GStore  map[string]interface{}
 	myStore map[string]interface{}
 }
 
-type Request struct {
-	Header map[string]interface{}
-	Body   map[string]interface{}
-}
-
-func (r *Request) GetCMD() string {
-	return r.Header["CMD"].(string)
-}
-
-type Response struct {
+type CData struct {
 	Header map[string]interface{}
 	Body   map[string]interface{}
 }
 
 func NewContext(gstore map[string]interface{}, data map[string]interface{}) (*Context, error) {
-	req, err := NewRequest(data)
+	req, err := CreateReq(data)
 	if err != nil {
 		return nil, err
 	}
-	return &Context{GStore: gstore, Req: req, Res: NewResponse(), Stash: map[string]interface{}{}}, nil
-}
-
-func NewResponse() *Response {
-	return &Response{Header: map[string]interface{}{"STATUS": STATUS_FORBIDDEN}, Body: map[string]interface{}{}}
-}
-func (r *Response) GetData() map[string]interface{} {
-	data := map[string]interface{}{}
-	data["H"] = r.Header
-	data["B"] = r.Body
-	return data
-}
-
-func NewRequest(data map[string]interface{}) (*Request, error) {
-	return &Request{Header: data["H"].(map[string]interface{}), Body: data["B"].(map[string]interface{})}, nil
+	return &Context{GStore: gstore, Req: req, Res: CreateRes(), Stash: map[string]interface{}{}}, nil
 }
 
 func (c *Context) SetupMyStore() {
@@ -77,4 +53,23 @@ func (c *Context) SetupMyStore() {
 }
 func (c *Context) MyStore() map[string]interface{} {
 	return c.myStore
+}
+
+func CreateRes() *CData {
+	return &CData{Header: map[string]interface{}{"STATUS": STATUS_FORBIDDEN}, Body: map[string]interface{}{}}
+}
+
+func CreateReq(data map[string]interface{}) (*CData, error) {
+	return &CData{Header: data["H"].(map[string]interface{}), Body: data["B"].(map[string]interface{})}, nil
+}
+
+func (r *CData) GetCMD() string {
+	return r.Header["CMD"].(string)
+}
+
+func (r *CData) GetData() map[string]interface{} {
+	data := map[string]interface{}{}
+	data["H"] = r.Header
+	data["B"] = r.Body
+	return data
 }

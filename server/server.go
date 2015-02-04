@@ -55,8 +55,8 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 
 	for {
 		fmt.Println("start")
-		cdata := CData{SerializorType: SERIALIZOR_TYPE_MESSAGE_PACK}
-		data, err := cdata.Receive(conn)
+		cm := CDataManager{SerializorType: SERIALIZOR_TYPE_MESSAGE_PACK}
+		data, err := cm.Receive(conn)
 		if err != nil {
 			if err == io.EOF {
 				fmt.Println("client dissconected")
@@ -112,7 +112,7 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 			}
 		}
 
-		err = cdata.Send(conn, c.Res.GetData())
+		err = cm.Send(conn, c.Res.GetData())
 		if err != nil {
 			fmt.Println("send fail", err)
 			break

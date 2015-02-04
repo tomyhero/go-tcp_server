@@ -14,11 +14,11 @@ const (
 	SERIALIZOR_TYPE_JSON         = 1
 )
 
-type CData struct {
+type CDataManager struct {
 	SerializorType int
 }
 
-func (c CData) Receive(conn net.Conn) (data map[string]interface{}, err error) {
+func (c CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			switch x := e.(type) {
@@ -58,7 +58,7 @@ func (c CData) Receive(conn net.Conn) (data map[string]interface{}, err error) {
 	return data, err
 }
 
-func (c CData) Send(conn net.Conn, data map[string]interface{}) error {
+func (c CDataManager) Send(conn net.Conn, data map[string]interface{}) error {
 
 	if c.SerializorType == SERIALIZOR_TYPE_MESSAGE_PACK {
 		serializer := serializer.MessagePack{}
