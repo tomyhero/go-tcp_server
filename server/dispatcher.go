@@ -50,3 +50,18 @@ func (d *Dispatcher) AfterExecute(c *context.Context, cmd string) {
 	handler := d.mapHandlers[prefix]
 	handler.HookAfterExecute(c)
 }
+
+func (d *Dispatcher) HookInitialize(gstore map[string]interface{}) {
+	for _, handler := range d.Handlers {
+		myStore := map[string]interface{}{}
+		gstore[handler.Prefix()] = myStore
+		handler.HookInitialize(gstore, myStore)
+	}
+}
+func (d *Dispatcher) HookFinalize(gstore map[string]interface{}) {
+	for _, handler := range d.Handlers {
+
+		myStore := gstore[handler.Prefix()].(map[string]interface{})
+		handler.HookFinalize(gstore, myStore)
+	}
+}

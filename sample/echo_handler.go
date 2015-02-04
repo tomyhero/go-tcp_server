@@ -21,8 +21,17 @@ func NewEchoHandler() *EchoHandler {
 	return &EchoHandler{Authorizer: authorizer.PlainPassword{Password: "1111"}}
 }
 
+func (h *EchoHandler) HookInitialize(g map[string]interface{}, myStore map[string]interface{}) {
+	myStore["num"] = 0
+}
+func (h *EchoHandler) HookFinalize(g map[string]interface{}, myStore map[string]interface{}) {
+
+}
+
 func (h *EchoHandler) HookBeforeExecute(c *context.Context) {
-	fmt.Println("Called BeforeExecuteHandler")
+	fmt.Println("Called BeforeExecuteHandler", c.MyStore, c.GStore["echo"])
+	myStore := c.MyStore()
+	myStore["num"] = myStore["num"].(int) + 1
 }
 
 func (h *EchoHandler) HookAfterExecute(c *context.Context) {
@@ -31,6 +40,6 @@ func (h *EchoHandler) HookAfterExecute(c *context.Context) {
 
 func (h *EchoHandler) ActionEcho(c *context.Context) (*context.Context, error) {
 	c.Res.Body = c.Req.Body
-	fmt.Println(c, "Echo Echo!")
+	fmt.Println(c, "Echo Echo!", c.MyStore()["num"].(int))
 	return c, nil
 }

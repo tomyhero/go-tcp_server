@@ -1,5 +1,10 @@
 package context
 
+import (
+	"fmt"
+	"strings"
+)
+
 const (
 	STATUS_NOT_PREPARE       = 0
 	STATUS_OK                = 1
@@ -11,6 +16,8 @@ const (
 type IHandler interface {
 	Prefix() string
 	GetAuthorizer() IAuthorizer
+	HookInitialize(g map[string]interface{}, myStore map[string]interface{})
+	HookFinalize(g map[string]interface{}, myStore map[string]interface{})
 	HookBeforeExecute(c *Context)
 	HookAfterExecute(c *Context)
 }
@@ -21,9 +28,11 @@ type IAuthorizer interface {
 }
 
 type Context struct {
-	Req   *Request
-	Res   *Response
-	Stash map[string]interface{}
+	Req     *Request
+	Res     *Response
+	Stash   map[string]interface{}
+	GStore  map[string]interface{}
+	myStore map[string]interface{}
 }
 
 type Request struct {
@@ -40,12 +49,12 @@ type Response struct {
 	Body   map[string]interface{}
 }
 
-func NewContext(data map[string]interface{}) (*Context, error) {
+func NewContext(gstore map[string]interface{}, data map[string]interface{}) (*Context, error) {
 	req, err := NewRequest(data)
 	if err != nil {
 		return nil, err
 	}
-	return &Context{Req: req, Res: NewResponse(), Stash: map[string]interface{}{}}, nil
+	return &Context{GStore: gstore, Req: req, Res: NewResponse(), Stash: map[string]interface{}{}}, nil
 }
 
 func NewResponse() *Response {
@@ -60,4 +69,12 @@ func (r *Response) GetData() map[string]interface{} {
 
 func NewRequest(data map[string]interface{}) (*Request, error) {
 	return &Request{Header: data["H"].(map[string]interface{}), Body: data["B"].(map[string]interface{})}, nil
+}
+
+func (c *Context) SetupMyStore() {
+	prefix := strings.Split(c.Req.GetCMD(), "_")[0]
+	c.myStore = c.GStore[prefix].(map[string]interface{})
+}
+func (c *Context) MyStore() map[string]interface{} {
+	return c.myStore
 }

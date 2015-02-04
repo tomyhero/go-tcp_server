@@ -10,6 +10,9 @@ import (
 	"reflect"
 )
 
+// global data storage
+var gstore map[string]interface{} = map[string]interface{}{}
+
 type Server struct {
 	Port       int
 	conns      []net.Conn
@@ -26,7 +29,13 @@ func (s *Server) Run() error {
 	if err != nil {
 		return err
 	}
-	defer ln.Close()
+	defer func() {
+		ln.Close()
+		s.dispatcher.HookFinalize(gstore)
+
+	}()
+
+	s.dispatcher.HookInitialize(gstore)
 
 	for {
 		conn, err := ln.Accept()
@@ -58,7 +67,7 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 			}
 		}
 
-		c, err := context.NewContext(data)
+		c, err := context.NewContext(gstore, data)
 		if err != nil {
 			fmt.Println("create context", err)
 			break
@@ -67,7 +76,9 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 		loginAction, onLogin := dispatcher.LoginActions[c.Req.GetCMD()]
 		// do login
 		if onLogin {
+			c.SetupMyStore()
 			fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.LoginActions, loginAction)
+
 			ok := loginAction.Call([]reflect.Value{reflect.ValueOf(c)})[0].Bool()
 			if ok {
 				c.Res.Header["STATUS"] = context.STATUS_OK
@@ -80,6 +91,8 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 			action, find := dispatcher.Actions[c.Req.GetCMD()]
 			fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.Actions, action, find)
 			if find {
+				c.SetupMyStore()
+
 				if dispatcher.ExecAuth(c, c.Req.GetCMD()) {
 
 					// BEFORE_EXECUTE
