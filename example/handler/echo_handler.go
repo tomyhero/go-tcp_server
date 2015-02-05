@@ -1,4 +1,4 @@
-package sample
+package handler
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func NewEchoHandler() *EchoHandler {
 func (h *EchoHandler) HookInitialize(g map[string]interface{}, myStore map[string]interface{}) {
 	myStore["num"] = 0
 }
-func (h *EchoHandler) HookFinalize(g map[string]interface{}, myStore map[string]interface{}) {
+func (h *EchoHandler) HookDestroy(g map[string]interface{}, myStore map[string]interface{}) {
 
 }
 

@@ -1,6 +1,7 @@
 package context
 
 import (
+	"net"
 	"strings"
 )
 
@@ -16,7 +17,7 @@ type IHandler interface {
 	Prefix() string
 	GetAuthorizer() IAuthorizer
 	HookInitialize(g map[string]interface{}, myStore map[string]interface{})
-	HookFinalize(g map[string]interface{}, myStore map[string]interface{})
+	HookDestroy(g map[string]interface{}, myStore map[string]interface{})
 	HookBeforeExecute(c *Context)
 	HookAfterExecute(c *Context)
 }
@@ -27,24 +28,27 @@ type IAuthorizer interface {
 }
 
 type Context struct {
-	Req     *CData
-	Res     *CData
-	Stash   map[string]interface{}
-	GStore  map[string]interface{}
-	myStore map[string]interface{}
+	Req          *CData
+	Res          *CData
+	Conn         net.Conn
+	CDataManager *CDataManager
+	GStore       map[string]interface{}
+	myStore      map[string]interface{}
 }
 
-type CData struct {
-	Header map[string]interface{}
-	Body   map[string]interface{}
-}
-
-func NewContext(gstore map[string]interface{}, data map[string]interface{}) (*Context, error) {
+func NewContext(conn net.Conn, gstore map[string]interface{}, data map[string]interface{}) (*Context, error) {
 	req, err := CreateReq(data)
 	if err != nil {
 		return nil, err
 	}
-	return &Context{GStore: gstore, Req: req, Res: CreateRes(), Stash: map[string]interface{}{}}, nil
+	context := &Context{
+		Conn:         conn,
+		GStore:       gstore,
+		Req:          req,
+		Res:          CreateRes(req.GetCMD()),
+		CDataManager: &CDataManager{},
+	}
+	return context, nil
 }
 
 func (c *Context) SetupMyStore() {
@@ -55,8 +59,9 @@ func (c *Context) MyStore() map[string]interface{} {
 	return c.myStore
 }
 
-func CreateRes() *CData {
-	return &CData{Header: map[string]interface{}{"STATUS": STATUS_FORBIDDEN}, Body: map[string]interface{}{}}
+func CreateRes(reqCmd string) *CData {
+	cmd := reqCmd + "_res"
+	return &CData{Header: map[string]interface{}{"STATUS": STATUS_FORBIDDEN, "CMD": cmd}, Body: map[string]interface{}{}}
 }
 
 func CreateReq(data map[string]interface{}) (*CData, error) {

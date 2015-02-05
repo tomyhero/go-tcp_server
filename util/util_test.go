@@ -9,7 +9,7 @@ import (
 
 func TestGetMethods(t *testing.T) {
 	actions := map[string]reflect.Value{}
-	Getactions(actions,&sample.EchoHandler{})
+	Getactions(actions,&exsample.EchoHandler{})
 	c := &server.Context{}
 	actions["prefix_Echo"].Call([]reflect.Value{reflect.ValueOf(c)})
 	assert.NotNil(t, actions)

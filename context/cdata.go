@@ -1,4 +1,4 @@
-package server
+package context
 
 import (
 	"bytes"
@@ -16,6 +16,11 @@ const (
 
 type CDataManager struct {
 	SerializorType int
+}
+
+type CData struct {
+	Header map[string]interface{}
+	Body   map[string]interface{}
 }
 
 func (c CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err error) {

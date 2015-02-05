@@ -58,10 +58,10 @@ func (d *Dispatcher) HookInitialize(gstore map[string]interface{}) {
 		handler.HookInitialize(gstore, myStore)
 	}
 }
-func (d *Dispatcher) HookFinalize(gstore map[string]interface{}) {
+func (d *Dispatcher) HookDestroy(gstore map[string]interface{}) {
 	for _, handler := range d.Handlers {
 
 		myStore := gstore[handler.Prefix()].(map[string]interface{})
-		handler.HookFinalize(gstore, myStore)
+		handler.HookDestroy(gstore, myStore)
 	}
 }

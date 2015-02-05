@@ -1,7 +1,6 @@
 package server
 
 import (
-	//"bytes"
 	"fmt"
 	"github.com/tomyhero/ore_server/context"
 	"io"
@@ -10,32 +9,30 @@ import (
 	"reflect"
 )
 
-// global data storage
-var gstore map[string]interface{} = map[string]interface{}{}
-
 type Server struct {
-	Port       int
-	conns      []net.Conn
-	ln         net.Listener
-	dispatcher *Dispatcher
+	Port       int                    // listen port number 
+	dispatcher *Dispatcher            // hold handlers and dispatch to it
+	gstore     map[string]interface{} // global data storage
 }
 
 func (s *Server) Setup(handlers []context.IHandler) {
 	s.dispatcher = NewDispatcher(handlers)
+	s.gstore = map[string]interface{}{}
 }
 
 func (s *Server) Run() error {
+
 	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", s.Port))
 	if err != nil {
 		return err
 	}
+
 	defer func() {
 		ln.Close()
-		s.dispatcher.HookFinalize(gstore)
-
+		s.dispatcher.HookDestroy(s.gstore)
 	}()
 
-	s.dispatcher.HookInitialize(gstore)
+	s.dispatcher.HookInitialize(s.gstore)
 
 	for {
 		conn, err := ln.Accept()
@@ -43,19 +40,21 @@ func (s *Server) Run() error {
 			fmt.Println("Error Accepting", err.Error())
 			os.Exit(1)
 		}
-		go handle(s.dispatcher, conn)
+		go s.handle(s.dispatcher, conn)
 	}
 }
 
 // Handles incoming requests.
-func handle(dispatcher *Dispatcher, conn net.Conn) {
+func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
 
 	// when out of for loop, close the connection.
-	defer conn.Close()
+	defer func() {
+		conn.Close()
+	}()
 
 	for {
 		fmt.Println("start")
-		cm := CDataManager{SerializorType: SERIALIZOR_TYPE_MESSAGE_PACK}
+		cm := context.CDataManager{SerializorType: context.SERIALIZOR_TYPE_MESSAGE_PACK}
 		data, err := cm.Receive(conn)
 		if err != nil {
 			if err == io.EOF {
@@ -67,7 +66,7 @@ func handle(dispatcher *Dispatcher, conn net.Conn) {
 			}
 		}
 
-		c, err := context.NewContext(gstore, data)
+		c, err := context.NewContext(conn, s.gstore, data)
 		if err != nil {
 			fmt.Println("create context", err)
 			break

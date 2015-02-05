@@ -9,7 +9,7 @@ import (
 
 func TestNewContext(t *testing.T) {
 	data := map[string]interface{}{"H": map[string]interface{}{"CMD": "prefix_Echo"}, "B": map[string]interface{}{"text": "Hello World\n"}}
-	c, err := NewContext(data)
+	c, err := NewContext(nil, map[string]interface{}{}, data)
 	fmt.Println(c)
 	assert.Nil(t, err)
 	assert.Equal(t, "prefix_Echo", c.Req.Header["CMD"])
@@ -17,7 +17,7 @@ func TestNewContext(t *testing.T) {
 
 func TestNewCData(t *testing.T) {
 	data := map[string]interface{}{"H": map[string]interface{}{"CMD": "prefix_Echo"}, "B": map[string]interface{}{"text": "Hello World\n", "id": []int{1, 2, 3}}}
-	req, err := NewCData(data)
+	req, err := CreateReq(data)
 	assert.Nil(t, err)
 	assert.Equal(t, "prefix_Echo", req.Header["CMD"])
 
