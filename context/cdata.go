@@ -23,6 +23,17 @@ type CData struct {
 	Body   map[string]interface{}
 }
 
+func (r *CData) GetCMD() string {
+	return r.Header["CMD"].(string)
+}
+
+func (r *CData) GetData() map[string]interface{} {
+	data := map[string]interface{}{}
+	data["H"] = r.Header
+	data["B"] = r.Body
+	return data
+}
+
 func (c CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err error) {
 	defer func() {
 		if e := recover(); e != nil {

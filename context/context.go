@@ -67,14 +67,3 @@ func CreateRes(reqCmd string) *CData {
 func CreateReq(data map[string]interface{}) (*CData, error) {
 	return &CData{Header: data["H"].(map[string]interface{}), Body: data["B"].(map[string]interface{})}, nil
 }
-
-func (r *CData) GetCMD() string {
-	return r.Header["CMD"].(string)
-}
-
-func (r *CData) GetData() map[string]interface{} {
-	data := map[string]interface{}{}
-	data["H"] = r.Header
-	data["B"] = r.Body
-	return data
-}
