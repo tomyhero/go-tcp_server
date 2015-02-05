@@ -7,56 +7,93 @@ import (
 	"net"
 	"os"
 	"reflect"
+	"sync"
+	"time"
 )
 
 type Server struct {
-	Port       int                    // listen port number 
-	dispatcher *Dispatcher            // hold handlers and dispatch to it
-	gstore     map[string]interface{} // global data storage
+	Port          int                    // listen port number 
+	dispatcher    *Dispatcher            // hold handlers and dispatch to it
+	gstore        map[string]interface{} // global data storage
+	quit          chan bool
+	waitQuitGroup *sync.WaitGroup
 }
 
 func (s *Server) Setup(handlers []context.IHandler) {
+	s.quit = make(chan bool)
+	s.waitQuitGroup = &sync.WaitGroup{}
 	s.dispatcher = NewDispatcher(handlers)
 	s.gstore = map[string]interface{}{}
+	s.waitQuitGroup.Add(1)
 }
 
-func (s *Server) Run() error {
+func (s *Server) Run() {
+	defer s.waitQuitGroup.Done()
+	fmt.Println("Starting Server")
+	defer fmt.Println("Stoping Server")
 
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", s.Port))
+	laddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", s.Port))
 	if err != nil {
-		return err
+		fmt.Println(err)
+		os.Exit(1)
 	}
+	ln, err := net.ListenTCP("tcp", laddr)
 
 	defer func() {
 		ln.Close()
 		s.dispatcher.HookDestroy(s.gstore)
 	}()
 
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	s.dispatcher.HookInitialize(s.gstore)
 
 	for {
+		select {
+		case <-s.quit:
+			fmt.Println("stopping listening on", ln.Addr())
+			return
+		default:
+		}
+
+		ln.SetDeadline(time.Now().Add(1e9))
 		conn, err := ln.Accept()
 		if err != nil {
+			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
+				continue
+			}
 			fmt.Println("Error Accepting", err.Error())
 			os.Exit(1)
 		}
+		s.waitQuitGroup.Add(1)
 		go s.handle(s.dispatcher, conn)
 	}
 }
 
 // Handles incoming requests.
 func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
-
-	// when out of for loop, close the connection.
-	defer func() {
-		conn.Close()
-	}()
+	defer conn.Close()
+	defer s.waitQuitGroup.Done()
 
 	for {
+		select {
+		case <-s.quit:
+			fmt.Println("disconnecting", conn.RemoteAddr())
+			return
+		default:
+		}
+
 		fmt.Println("start")
 		cm := context.CDataManager{SerializorType: context.SERIALIZOR_TYPE_MESSAGE_PACK}
+		conn.SetDeadline(time.Now().Add(1e9))
 		data, err := cm.Receive(conn)
 		if err != nil {
+			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
+				continue
+			}
 			if err == io.EOF {
 				fmt.Println("client dissconected")
 				break
@@ -118,4 +155,10 @@ func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
 		}
 		fmt.Println("end")
 	}
+}
+
+func (s *Server) Shutdown() {
+	close(s.quit)
+	fmt.Println("Waiting Shutdown...")
+	s.waitQuitGroup.Wait()
 }
