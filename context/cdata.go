@@ -71,6 +71,7 @@ func (c CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err e
 		}
 	}
 
+	fmt.Println("RECEIVE", data["H"].(map[string]interface{})["CMD"])
 	return data, err
 }
 
@@ -82,14 +83,18 @@ func (c CDataManager) Send(conn net.Conn, data map[string]interface{}) error {
 		if err != nil {
 			return err
 		}
-		conn.Write(buf.Bytes())
+		fmt.Println("SEND", data["H"].(map[string]interface{})["CMD"])
+		_, err = conn.Write(buf.Bytes())
+		if err != nil {
+			return err
+		}
 	} else if c.SerializorType == SERIALIZOR_TYPE_JSON {
 		serializer := serializer.JSON{}
 		buf, err := serializer.Serialize(data)
 		if err != nil {
 			return err
 		}
-		conn.Write(buf.Bytes())
+		_, err = conn.Write(buf.Bytes())
 	}
 
 	return nil

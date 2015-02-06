@@ -12,11 +12,12 @@ import (
 )
 
 type Server struct {
-	Port          int                    // listen port number 
-	dispatcher    *Dispatcher            // hold handlers and dispatch to it
-	gstore        map[string]interface{} // global data storage
-	quit          chan bool
-	waitQuitGroup *sync.WaitGroup
+	Port          int                      // listen port number 
+	dispatcher    *Dispatcher              // hold handlers and dispatch to it
+	gstore        map[string]interface{}   // global data storage
+	quit          chan bool                // chan for quit trigger.
+	waitQuitGroup *sync.WaitGroup          // wait for graceful stop
+	connStore     map[net.Conn]interface{} // store all connection related data
 }
 
 func (s *Server) Setup(handlers []context.IHandler) {
@@ -24,6 +25,7 @@ func (s *Server) Setup(handlers []context.IHandler) {
 	s.waitQuitGroup = &sync.WaitGroup{}
 	s.dispatcher = NewDispatcher(handlers)
 	s.gstore = map[string]interface{}{}
+	s.connStore = map[net.Conn]interface{}{}
 	s.waitQuitGroup.Add(1)
 }
 
@@ -54,7 +56,7 @@ func (s *Server) Run() {
 	for {
 		select {
 		case <-s.quit:
-			fmt.Println("stopping listening on", ln.Addr())
+			//fmt.Println("stopping listening on", ln.Addr())
 			return
 		default:
 		}
@@ -69,24 +71,35 @@ func (s *Server) Run() {
 			os.Exit(1)
 		}
 		s.waitQuitGroup.Add(1)
+		s.connStore[conn] = map[string]interface{}{}
+
 		go s.handle(s.dispatcher, conn)
 	}
 }
 
+func (s *Server) Shutdown() {
+	close(s.quit)
+	//fmt.Println("Waiting Shutdown...")
+	s.waitQuitGroup.Wait()
+}
+
 // Handles incoming requests.
 func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
-	defer conn.Close()
+	defer func() {
+		conn.Close()
+		delete(s.connStore, conn)
+	}()
 	defer s.waitQuitGroup.Done()
 
 	for {
 		select {
 		case <-s.quit:
-			fmt.Println("disconnecting", conn.RemoteAddr())
+			//fmt.Println("disconnecting", conn.RemoteAddr())
 			return
 		default:
 		}
 
-		fmt.Println("start")
+		//	fmt.Println("start")
 		cm := context.CDataManager{SerializorType: context.SERIALIZOR_TYPE_MESSAGE_PACK}
 		conn.SetDeadline(time.Now().Add(1e9))
 		data, err := cm.Receive(conn)
@@ -103,7 +116,7 @@ func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
 			}
 		}
 
-		c, err := context.NewContext(conn, s.gstore, data)
+		c, err := context.NewContext(conn, s.gstore, data, s.connStore)
 		if err != nil {
 			fmt.Println("create context", err)
 			break
@@ -113,7 +126,7 @@ func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
 		// do login
 		if onLogin {
 			c.SetupMyStore()
-			fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.LoginActions, loginAction)
+			//fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.LoginActions, loginAction)
 
 			ok := loginAction.Call([]reflect.Value{reflect.ValueOf(c)})[0].Bool()
 			if ok {
@@ -155,10 +168,4 @@ func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
 		}
 		fmt.Println("end")
 	}
-}
-
-func (s *Server) Shutdown() {
-	close(s.quit)
-	fmt.Println("Waiting Shutdown...")
-	s.waitQuitGroup.Wait()
 }

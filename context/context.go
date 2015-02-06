@@ -33,20 +33,23 @@ type Context struct {
 	Conn         net.Conn
 	CDataManager *CDataManager
 	GStore       map[string]interface{}
+	ConnStore    map[net.Conn]interface{}
 	myStore      map[string]interface{}
 }
 
-func NewContext(conn net.Conn, gstore map[string]interface{}, data map[string]interface{}) (*Context, error) {
+func NewContext(conn net.Conn, gstore map[string]interface{}, data map[string]interface{}, connStore map[net.Conn]interface{}) (*Context, error) {
 	req, err := CreateReq(data)
 	if err != nil {
 		return nil, err
 	}
+
 	context := &Context{
 		Conn:         conn,
 		GStore:       gstore,
 		Req:          req,
 		Res:          CreateRes(req.GetCMD()),
 		CDataManager: &CDataManager{},
+		ConnStore:    connStore,
 	}
 	return context, nil
 }

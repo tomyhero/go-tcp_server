@@ -7,27 +7,14 @@ import (
 	"github.com/tomyhero/ore_server/client"
 	"github.com/tomyhero/ore_server/context"
 	"github.com/tomyhero/ore_server/example/handler"
-	"net"
+	"github.com/tomyhero/ore_server/util"
 	"testing"
 	"time"
 )
 
-func emptyPort() (int, error) {
-	l, err := net.Listen("tcp", ":0")
-	defer l.Close()
-
-	if err != nil {
-		return 0, fmt.Errorf("Fail to listen empty port")
-	}
-
-	addr := l.Addr()
-	port := addr.(*net.TCPAddr).Port
-	return port, nil
-}
-
 func TestClient(t *testing.T) {
 
-	port, err := emptyPort()
+	port, err := util.EmptyPort()
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()

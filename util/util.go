@@ -2,10 +2,30 @@ package util
 
 import (
 	"fmt"
+	"github.com/nu7hatch/gouuid"
+	"net"
 	"reflect"
 	"regexp"
 	"strings"
 )
+
+func GenUUID() (string, error) {
+	u4, err := uuid.NewV4()
+	return u4.String(), err
+}
+
+func EmptyPort() (int, error) {
+	l, err := net.Listen("tcp", ":0")
+	defer l.Close()
+
+	if err != nil {
+		return 0, fmt.Errorf("Fail to listen empty port")
+	}
+
+	addr := l.Addr()
+	port := addr.(*net.TCPAddr).Port
+	return port, nil
+}
 
 func GetMethods(actions map[string]reflect.Value, in interface{}) {
 	t := reflect.TypeOf(in)
