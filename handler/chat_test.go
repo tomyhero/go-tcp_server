@@ -42,13 +42,14 @@ func TestChat(t *testing.T) {
 			return
 		}
 
+		wg.Add(1)
+		go ReceiveHandler(i, &cl, t)
+
 		err = cl.Send(&context.CData{
 			Header: map[string]interface{}{"CMD": "chat_login"},
 			Body:   map[string]interface{}{},
 		})
 
-		wg.Add(1)
-		go ReceiveHandler(i, &cl, t)
 	}
 
 	assert.Equal(t, 1, 1)

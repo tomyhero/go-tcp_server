@@ -47,9 +47,12 @@ func (h *ChatHandler) ActionBroadcast(c *context.Context) {
 	}
 
 	for conn, _ := range c.ConnStore {
-		err := c.CDataManager.Send(conn, cdata.GetData())
-		if err != nil {
-			fmt.Println(err)
+		// XXX
+		if c.Conn != conn {
+			err := c.CDataManager.Send(conn, cdata.GetData())
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 }

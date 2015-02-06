@@ -138,7 +138,7 @@ func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
 		} else {
 
 			action, find := dispatcher.Actions[c.Req.GetCMD()]
-			fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.Actions, action, find)
+			//fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.Actions, action, find)
 			if find {
 				c.SetupMyStore()
 

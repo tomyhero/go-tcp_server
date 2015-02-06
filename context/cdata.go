@@ -71,7 +71,7 @@ func (c CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err e
 		}
 	}
 
-	fmt.Println("RECEIVE", data["H"].(map[string]interface{})["CMD"])
+	fmt.Println("RECEIVE", conn, data["H"].(map[string]interface{})["CMD"])
 	return data, err
 }
 
@@ -83,7 +83,7 @@ func (c CDataManager) Send(conn net.Conn, data map[string]interface{}) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("SEND", data["H"].(map[string]interface{})["CMD"])
+		fmt.Println("SEND", conn, data["H"].(map[string]interface{})["CMD"])
 		_, err = conn.Write(buf.Bytes())
 		if err != nil {
 			return err
