@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/tomyhero/ore_server/authorizer"
 	"github.com/tomyhero/ore_server/context"
+	"time"
 )
 
 // Setup Section
@@ -47,12 +48,12 @@ func (h *ChatHandler) ActionBroadcast(c *context.Context) {
 	}
 
 	for conn, _ := range c.ConnStore {
-		// XXX
-		if c.Conn != conn {
-			err := c.CDataManager.Send(conn, cdata.GetData())
-			if err != nil {
-				fmt.Println(err)
-			}
+		err := c.CDataManager.Send(conn, cdata.GetData())
+		if err != nil {
+			fmt.Println(err)
 		}
 	}
+
+	//time.Sleep(100 * time.Millisecond)
+
 }
