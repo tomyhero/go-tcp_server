@@ -14,6 +14,10 @@ import (
 
 var wg *sync.WaitGroup = &sync.WaitGroup{}
 
+var try = 3
+var countMessage = 0
+var countBroadcast = 0
+
 func TestChat(t *testing.T) {
 
 	port, err := util.EmptyPort()
@@ -33,7 +37,7 @@ func TestChat(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < try; i++ {
 		cl := client.Client{}
 		err = cl.Connect(fmt.Sprintf(":%d", port))
 		if err != nil {
@@ -56,6 +60,9 @@ func TestChat(t *testing.T) {
 
 	wg.Wait()
 
+	assert.Equal(t, try, countBroadcast)
+	assert.NotEqual(t, 0, countMessage)
+
 }
 
 func ReceiveHandler(id int, cl *client.Client, t *testing.T) {
@@ -71,14 +78,22 @@ func ReceiveHandler(id int, cl *client.Client, t *testing.T) {
 			return
 		}
 
+		fmt.Println("CRes", res.GetCMD())
+
 		switch {
 		case "chat_login_res" == res.GetCMD():
 
 			accessToken := res.Body["AUTH_ACCESS_TOKEN"]
 			assert.NotNil(t, accessToken)
+			hoge := "hgoe ghoegeh ogehoge ogehoego hgeo poafdij paodf japdsofaj pdoijf pdasfo daof ijadopf j"
+			for i := 0; i < 10; i++ {
+				hoge = hoge + hoge
+			}
+			hoge = fmt.Sprintf("I am alive! %d %s", id, hoge)
+			fmt.Println(fmt.Sprintf("Send Message Len %d", len(hoge)))
 			err := cl.Send(&context.CData{
 				Header: map[string]interface{}{"CMD": "chat_Broadcast", "AUTH_ACCESS_TOKEN": accessToken},
-				Body:   map[string]interface{}{"name": fmt.Sprintf("tomyhero_%d", id), "message": fmt.Sprintf("I am alive! %d", id)},
+				Body:   map[string]interface{}{"name": fmt.Sprintf("tomyhero_%d", id), "message": hoge},
 			})
 			if err != nil {
 				fmt.Println(err)
@@ -86,13 +101,11 @@ func ReceiveHandler(id int, cl *client.Client, t *testing.T) {
 				return
 			}
 		case "chat_Broadcast_res" == res.GetCMD():
-			fmt.Println("Broadcat OK", res)
-			// XXX OMG I CAN NOT GET HERE!! WHY!!
+			countBroadcast = countBroadcast + 1
 			return
 		case "chat_message" == res.GetCMD():
-			fmt.Println("Message Received")
-			fmt.Println(id, res)
+			fmt.Println("Receive Message Len", len(res.Body["message"].(string)))
+			countMessage = countMessage + 1
 		}
 	}
-
 }

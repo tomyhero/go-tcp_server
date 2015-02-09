@@ -50,7 +50,11 @@ func (h *ChatHandler) ActionBroadcast(c *context.Context) {
 	for conn, _ := range c.ConnStore {
 		err := c.CDataManager.Send(conn, cdata.GetData())
 		if err != nil {
-			fmt.Println(err)
+			if c.Conn == conn {
+				fmt.Println("MySelf", err)
+			} else {
+				fmt.Println("Somebody", err)
+			}
 		}
 	}
 
