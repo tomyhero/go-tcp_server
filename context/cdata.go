@@ -1,11 +1,13 @@
 package context
 
 import (
-	"bytes"
+	//"bytes"
 	"errors"
 	"fmt"
 	"github.com/tomyhero/ore_server/serializer"
+	"github.com/ugorji/go/codec"
 	"net"
+	"reflect"
 )
 
 const (
@@ -50,29 +52,44 @@ func (c CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err e
 		}
 	}()
 
-	b := make([]byte, CDATA_SIZE) // XXX
-	_, err = conn.Read(b)
+	mh := codec.MsgpackHandle{}
+	mh.MapType = reflect.TypeOf(map[string]interface{}{})
+	mh.RawToString = true
+	dec := codec.NewDecoder(conn, &mh)
+	err = dec.Decode(&data)
 	if err != nil {
 		return nil, err
 	}
-	buf := bytes.NewBuffer(b)
 
-	if c.SerializorType == SERIALIZOR_TYPE_MESSAGE_PACK {
-		serializer := serializer.MessagePack{}
-		data, err = serializer.Deserialize(buf)
-		if err != nil {
-			fmt.Println(err)
-		}
-	} else if c.SerializorType == SERIALIZOR_TYPE_JSON {
-		serializer := serializer.JSON{}
-		data, err = serializer.Deserialize(buf)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
+	return data, nil
 
-	fmt.Println("RECEIVE", conn, data["H"].(map[string]interface{})["CMD"])
-	return data, err
+	/*
+		b := make([]byte, CDATA_SIZE) // XXX
+		_, err = conn.Read(b)
+		if err != nil {
+			fmt.Println("XXX", err)
+			return nil, err
+		}
+		fmt.Println("XXX", b)
+		buf := bytes.NewBuffer(b)
+
+		if c.SerializorType == SERIALIZOR_TYPE_MESSAGE_PACK {
+			serializer := serializer.MessagePack{}
+			data, err = serializer.Deserialize(buf)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else if c.SerializorType == SERIALIZOR_TYPE_JSON {
+			serializer := serializer.JSON{}
+			data, err = serializer.Deserialize(buf)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+
+		fmt.Println("RECEIVE", conn, data["H"].(map[string]interface{})["CMD"])
+		return data, err
+	*/
 }
 
 func (c CDataManager) Send(conn net.Conn, data map[string]interface{}) error {
