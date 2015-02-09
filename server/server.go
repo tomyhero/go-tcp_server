@@ -61,6 +61,7 @@ func (s *Server) Run() {
 		default:
 		}
 
+		// TODO
 		ln.SetDeadline(time.Now().Add(1e9))
 		conn, err := ln.Accept()
 		if err != nil {
@@ -101,6 +102,7 @@ func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
 
 		//	fmt.Println("start")
 		cm := context.CDataManager{SerializorType: context.SERIALIZOR_TYPE_MESSAGE_PACK}
+		// TODO 
 		conn.SetDeadline(time.Now().Add(1e9))
 		data, err := cm.Receive(conn)
 		if err != nil {
