@@ -1,22 +1,14 @@
 package context
 
 import (
-	//"bytes"
 	"errors"
-	"fmt"
-	"github.com/tomyhero/ore_server/serializer"
 	"github.com/ugorji/go/codec"
 	"net"
 	"reflect"
 )
 
-const (
-	SERIALIZOR_TYPE_MESSAGE_PACK = 0
-	SERIALIZOR_TYPE_JSON         = 1
-)
-
 type CDataManager struct {
-	SerializorType int
+	CodecHandle codec.Handle
 }
 
 type CData struct {
@@ -35,7 +27,18 @@ func (r *CData) GetData() map[string]interface{} {
 	return data
 }
 
-func (c CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err error) {
+func (c *CDataManager) codecHandle() codec.Handle {
+	if c.CodecHandle == nil {
+		var h = new(codec.MsgpackHandle)
+		h.MapType = reflect.TypeOf(map[string]interface{}{})
+		h.RawToString = true
+		c.CodecHandle = h
+	}
+
+	return c.CodecHandle
+}
+
+func (c *CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			switch x := e.(type) {
@@ -51,10 +54,7 @@ func (c CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err e
 		}
 	}()
 
-	mh := codec.MsgpackHandle{}
-	mh.MapType = reflect.TypeOf(map[string]interface{}{})
-	mh.RawToString = true
-	dec := codec.NewDecoder(conn, &mh)
+	dec := codec.NewDecoder(conn, c.codecHandle())
 	err = dec.Decode(&data)
 	if err != nil {
 		return nil, err
@@ -62,27 +62,8 @@ func (c CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err e
 	return data, nil
 }
 
-func (c CDataManager) Send(conn net.Conn, data map[string]interface{}) error {
-
-	if c.SerializorType == SERIALIZOR_TYPE_MESSAGE_PACK {
-		serializer := serializer.MessagePack{}
-		buf, err := serializer.Serialize(data)
-		if err != nil {
-			return err
-		}
-		fmt.Println("SEND", conn, data["H"].(map[string]interface{})["CMD"])
-		_, err = conn.Write(buf.Bytes())
-		if err != nil {
-			return err
-		}
-	} else if c.SerializorType == SERIALIZOR_TYPE_JSON {
-		serializer := serializer.JSON{}
-		buf, err := serializer.Serialize(data)
-		if err != nil {
-			return err
-		}
-		_, err = conn.Write(buf.Bytes())
-	}
-
-	return nil
+func (c *CDataManager) Send(conn net.Conn, data map[string]interface{}) error {
+	enc := codec.NewEncoder(conn, c.codecHandle())
+	err := enc.Encode(data)
+	return err
 }

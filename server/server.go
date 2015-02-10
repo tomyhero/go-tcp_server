@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/tomyhero/ore_server/context"
+	"github.com/ugorji/go/codec"
 	"io"
 	"net"
 	"os"
@@ -18,6 +19,7 @@ type Server struct {
 	quit          chan bool                // chan for quit trigger.
 	waitQuitGroup *sync.WaitGroup          // wait for graceful stop
 	connStore     map[net.Conn]interface{} // store all connection related data
+	CodecHandle   codec.Handle
 }
 
 func (s *Server) Setup(handlers []context.IHandler) {
@@ -74,7 +76,8 @@ func (s *Server) Run() {
 		s.waitQuitGroup.Add(1)
 		s.connStore[conn] = map[string]interface{}{}
 
-		go s.handle(s.dispatcher, conn)
+		cm := &context.CDataManager{CodecHandle: s.CodecHandle}
+		go s.handle(s.dispatcher, cm, conn)
 	}
 }
 
@@ -85,7 +88,7 @@ func (s *Server) Shutdown() {
 }
 
 // Handles incoming requests.
-func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
+func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn net.Conn) {
 	defer func() {
 		conn.Close()
 		delete(s.connStore, conn)
@@ -101,7 +104,6 @@ func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
 		}
 
 		//	fmt.Println("start")
-		cm := context.CDataManager{SerializorType: context.SERIALIZOR_TYPE_MESSAGE_PACK}
 		// TODO 
 		conn.SetDeadline(time.Now().Add(1e9))
 		data, err := cm.Receive(conn)
@@ -118,7 +120,7 @@ func (s *Server) handle(dispatcher *Dispatcher, conn net.Conn) {
 			}
 		}
 
-		c, err := context.NewContext(conn, s.gstore, data, s.connStore)
+		c, err := context.NewContext(conn, cm, s.gstore, data, s.connStore)
 		if err != nil {
 			fmt.Println("create context", err)
 			break

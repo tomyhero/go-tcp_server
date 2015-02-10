@@ -37,7 +37,7 @@ type Context struct {
 	myStore      map[string]interface{}
 }
 
-func NewContext(conn net.Conn, gstore map[string]interface{}, data map[string]interface{}, connStore map[net.Conn]interface{}) (*Context, error) {
+func NewContext(conn net.Conn, cDataManager *CDataManager, gstore map[string]interface{}, data map[string]interface{}, connStore map[net.Conn]interface{}) (*Context, error) {
 	req, err := CreateReq(data)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func NewContext(conn net.Conn, gstore map[string]interface{}, data map[string]in
 		GStore:       gstore,
 		Req:          req,
 		Res:          CreateRes(req.GetCMD()),
-		CDataManager: &CDataManager{},
+		CDataManager: cDataManager,
 		ConnStore:    connStore,
 	}
 	return context, nil

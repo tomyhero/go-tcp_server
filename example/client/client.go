@@ -1,9 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/tomyhero/ore_server/serializer"
+	"github.com/tomyhero/ore_server/context"
 	"net"
 )
 
@@ -23,28 +22,16 @@ func main() {
 
 func doLogin(conn net.Conn) {
 	in := map[string]interface{}{"H": map[string]interface{}{"CMD": "echo_login", "plain_password": "1111"}, "B": map[string]interface{}{}}
-	serialize := serializer.MessagePack{}
-	buf, err := serialize.Serialize(in)
-	conn.Write(buf.Bytes())
-	res := make([]byte, 2024)
-	conn.Read(res)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(serialize.Deserialize(bytes.NewBuffer(res)))
+	cm := &context.CDataManager{}
+	cm.Send(conn, in)
+	data, err := cm.Receive(conn)
+	fmt.Println("doLogin", data, err)
 }
 
 func doEcho(conn net.Conn) {
 	in := map[string]interface{}{"H": map[string]interface{}{"CMD": "echo_Echo", "AUTH_PLAIN_PASSWORD": "1111"}, "B": map[string]interface{}{"text": "Hello World\n"}}
-	serialize := serializer.MessagePack{}
-	buf, err := serialize.Serialize(in)
-	conn.Write(buf.Bytes())
-	res := make([]byte, 2024)
-	conn.Read(res)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(serialize.Deserialize(bytes.NewBuffer(res)))
+	cm := &context.CDataManager{}
+	cm.Send(conn, in)
+	data, err := cm.Receive(conn)
+	fmt.Println("doEcho", data, err)
 }

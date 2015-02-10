@@ -7,6 +7,8 @@ import (
 	"github.com/tomyhero/ore_server/context"
 	"github.com/tomyhero/ore_server/server"
 	"github.com/tomyhero/ore_server/util"
+	"github.com/ugorji/go/codec"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -27,7 +29,10 @@ func TestChat(t *testing.T) {
 		return
 	}
 
-	sv := server.Server{Port: port}
+	var ch = new(codec.MsgpackHandle)
+	ch.MapType = reflect.TypeOf(map[string]interface{}{})
+	ch.RawToString = true
+	sv := server.Server{Port: port, CodecHandle: ch}
 	defer sv.Shutdown()
 
 	handlers := make([]context.IHandler, 1)

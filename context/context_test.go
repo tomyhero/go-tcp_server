@@ -10,7 +10,7 @@ import (
 
 func TestNewContext(t *testing.T) {
 	data := map[string]interface{}{"H": map[string]interface{}{"CMD": "prefix_Echo"}, "B": map[string]interface{}{"text": "Hello World\n"}}
-	c, err := NewContext(nil, map[string]interface{}{}, data, map[net.Conn]interface{}{})
+	c, err := NewContext(nil, &CDataManager{}, map[string]interface{}{}, data, map[net.Conn]interface{}{})
 	fmt.Println(c)
 	assert.Nil(t, err)
 	assert.Equal(t, "prefix_Echo", c.Req.Header["CMD"])
