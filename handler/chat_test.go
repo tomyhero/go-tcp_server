@@ -32,7 +32,7 @@ func TestChat(t *testing.T) {
 	var ch = new(codec.MsgpackHandle)
 	ch.MapType = reflect.TypeOf(map[string]interface{}{})
 	ch.RawToString = true
-	sv := server.Server{Port: port, CodecHandle: ch}
+	sv := server.Server{Port: port, CodecHandle: ch, DeadLineMillisec: 200}
 	defer sv.Shutdown()
 
 	handlers := make([]context.IHandler, 1)

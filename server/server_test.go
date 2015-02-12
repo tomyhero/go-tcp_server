@@ -21,7 +21,7 @@ func TestClient(t *testing.T) {
 		return
 	}
 
-	sv := Server{Port: port}
+	sv := Server{Port: port, DeadLineMillisec: 200}
 	defer sv.Shutdown()
 
 	handlers := make([]context.IHandler, 1)

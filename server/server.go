@@ -13,13 +13,14 @@ import (
 )
 
 type Server struct {
-	Port          int                      // listen port number 
-	dispatcher    *Dispatcher              // hold handlers and dispatch to it
-	gstore        map[string]interface{}   // global data storage
-	quit          chan bool                // chan for quit trigger.
-	waitQuitGroup *sync.WaitGroup          // wait for graceful stop
-	connStore     map[net.Conn]interface{} // store all connection related data
-	CodecHandle   codec.Handle
+	Port             int                      // listen port number 
+	dispatcher       *Dispatcher              // hold handlers and dispatch to it
+	gstore           map[string]interface{}   // global data storage
+	quit             chan bool                // chan for quit trigger.
+	waitQuitGroup    *sync.WaitGroup          // wait for graceful stop
+	connStore        map[net.Conn]interface{} // store all connection related data
+	CodecHandle      codec.Handle
+	DeadLineMillisec time.Duration
 }
 
 func (s *Server) Setup(handlers []context.IHandler) {
@@ -29,6 +30,11 @@ func (s *Server) Setup(handlers []context.IHandler) {
 	s.gstore = map[string]interface{}{}
 	s.connStore = map[net.Conn]interface{}{}
 	s.waitQuitGroup.Add(1)
+
+	if s.DeadLineMillisec == 0 {
+		s.DeadLineMillisec = 1000 * 1 // 1 Sec
+	}
+
 }
 
 func (s *Server) Run() {
@@ -63,8 +69,7 @@ func (s *Server) Run() {
 		default:
 		}
 
-		// TODO
-		ln.SetDeadline(time.Now().Add(1e9))
+		ln.SetDeadline(time.Now().Add(s.DeadLineMillisec * time.Millisecond))
 		conn, err := ln.Accept()
 		if err != nil {
 			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
@@ -104,8 +109,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		}
 
 		//	fmt.Println("start")
-		// TODO 
-		conn.SetDeadline(time.Now().Add(1e9))
+		conn.SetDeadline(time.Now().Add(s.DeadLineMillisec * time.Millisecond))
 		data, err := cm.Receive(conn)
 		if err != nil {
 			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
