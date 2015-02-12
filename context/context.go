@@ -28,13 +28,14 @@ type IAuthorizer interface {
 }
 
 type Context struct {
-	Req          *CData
-	Res          *CData
-	Conn         net.Conn
-	CDataManager *CDataManager
-	GStore       map[string]interface{}
-	ConnStore    map[net.Conn]interface{}
-	myStore      map[string]interface{}
+	Req            *CData
+	Res            *CData
+	Conn           net.Conn
+	CDataManager   *CDataManager
+	GStore         map[string]interface{}
+	ConnStore      map[net.Conn]interface{}
+	myStore        map[string]interface{}
+	OnSendResponse bool
 }
 
 func NewContext(conn net.Conn, cDataManager *CDataManager, gstore map[string]interface{}, data map[string]interface{}, connStore map[net.Conn]interface{}) (*Context, error) {
@@ -44,12 +45,13 @@ func NewContext(conn net.Conn, cDataManager *CDataManager, gstore map[string]int
 	}
 
 	context := &Context{
-		Conn:         conn,
-		GStore:       gstore,
-		Req:          req,
-		Res:          CreateRes(req.GetCMD()),
-		CDataManager: cDataManager,
-		ConnStore:    connStore,
+		Conn:           conn,
+		GStore:         gstore,
+		Req:            req,
+		Res:            CreateRes(req.GetCMD()),
+		CDataManager:   cDataManager,
+		ConnStore:      connStore,
+		OnSendResponse: true,
 	}
 	return context, nil
 }

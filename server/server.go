@@ -169,10 +169,12 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 			}
 		}
 
-		err = cm.Send(conn, c.Res.GetData())
-		if err != nil {
-			fmt.Println("send fail", err)
-			break
+		if c.OnSendResponse {
+			err = cm.Send(conn, c.Res.GetData())
+			if err != nil {
+				fmt.Println("send fail", err)
+				break
+			}
 		}
 		fmt.Println("end")
 	}
