@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/ugorji/go/codec"
 	"net"
-	"reflect"
 )
 
 type CDataManager struct {
@@ -27,17 +26,6 @@ func (r *CData) GetData() map[string]interface{} {
 	return data
 }
 
-func (c *CDataManager) codecHandle() codec.Handle {
-	if c.CodecHandle == nil {
-		var h = new(codec.MsgpackHandle)
-		h.MapType = reflect.TypeOf(map[string]interface{}{})
-		h.RawToString = true
-		c.CodecHandle = h
-	}
-
-	return c.CodecHandle
-}
-
 func (c *CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err error) {
 	defer func() {
 		if e := recover(); e != nil {
@@ -54,7 +42,7 @@ func (c *CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err 
 		}
 	}()
 
-	dec := codec.NewDecoder(conn, c.codecHandle())
+	dec := codec.NewDecoder(conn, c.CodecHandle)
 	err = dec.Decode(&data)
 	if err != nil {
 		return nil, err
@@ -63,7 +51,7 @@ func (c *CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err 
 }
 
 func (c *CDataManager) Send(conn net.Conn, data map[string]interface{}) error {
-	enc := codec.NewEncoder(conn, c.codecHandle())
+	enc := codec.NewEncoder(conn, c.CodecHandle)
 	err := enc.Encode(data)
 	return err
 }

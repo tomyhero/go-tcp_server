@@ -32,7 +32,9 @@ func TestChat(t *testing.T) {
 	var ch = new(codec.MsgpackHandle)
 	ch.MapType = reflect.TypeOf(map[string]interface{}{})
 	ch.RawToString = true
-	sv := server.Server{Port: port, CodecHandle: ch, DeadLineMillisec: 200}
+	config := &server.TCPServerConfig{Port: port}
+	network := &server.TCPNetwork{Config: config}
+	sv := server.NewServer(network)
 	defer sv.Shutdown()
 
 	handlers := make([]context.IHandler, 1)
@@ -42,8 +44,15 @@ func TestChat(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
+	var h = new(codec.MsgpackHandle)
+	h.MapType = reflect.TypeOf(map[string]interface{}{})
+	h.RawToString = true
+
 	for i := 0; i < try; i++ {
-		cl := client.Client{}
+		cl := client.Client{
+			CDataManager: &context.CDataManager{CodecHandle: h},
+		}
+
 		err = cl.Connect(fmt.Sprintf(":%d", port))
 		if err != nil {
 			fmt.Println(err)

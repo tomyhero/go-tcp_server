@@ -12,15 +12,32 @@ import (
 	"time"
 )
 
+type IConfig interface {
+	GetPort() int
+	GetCodecHandle() codec.Handle
+	GetDeadLineMillisec() time.Duration
+	LoadDefault()
+}
+
+type INetwork interface {
+	Listen(port int) error
+	Accept() (net.Conn, error)
+	GetConfig() IConfig
+	Close()
+}
+
 type Server struct {
-	Port             int                      // listen port number 
-	dispatcher       *Dispatcher              // hold handlers and dispatch to it
-	gstore           map[string]interface{}   // global data storage
-	quit             chan bool                // chan for quit trigger.
-	waitQuitGroup    *sync.WaitGroup          // wait for graceful stop
-	connStore        map[net.Conn]interface{} // store all connection related data
-	CodecHandle      codec.Handle
-	DeadLineMillisec time.Duration
+	dispatcher    *Dispatcher              // hold handlers and dispatch to it
+	gstore        map[string]interface{}   // global data storage
+	quit          chan bool                // chan for quit trigger.
+	waitQuitGroup *sync.WaitGroup          // wait for graceful stop
+	connStore     map[net.Conn]interface{} // store all connection related data
+	Network       INetwork
+}
+
+func NewServer(network INetwork) *Server {
+	network.GetConfig().LoadDefault()
+	return &Server{Network: network}
 }
 
 func (s *Server) Setup(handlers []context.IHandler) {
@@ -30,27 +47,16 @@ func (s *Server) Setup(handlers []context.IHandler) {
 	s.gstore = map[string]interface{}{}
 	s.connStore = map[net.Conn]interface{}{}
 	s.waitQuitGroup.Add(1)
-
-	if s.DeadLineMillisec == 0 {
-		s.DeadLineMillisec = 1000 * 1 // 1 Sec
-	}
-
 }
 
 func (s *Server) Run() {
 	defer s.waitQuitGroup.Done()
-	fmt.Println("Starting Server")
-	defer fmt.Println("Stoping Server")
-
-	laddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", s.Port))
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	ln, err := net.ListenTCP("tcp", laddr)
+	network := s.Network
+	config := network.GetConfig()
+	err := network.Listen(config.GetPort())
 
 	defer func() {
-		ln.Close()
+		network.Close()
 		s.dispatcher.HookDestroy(s.gstore)
 	}()
 
@@ -64,13 +70,11 @@ func (s *Server) Run() {
 	for {
 		select {
 		case <-s.quit:
-			//fmt.Println("stopping listening on", ln.Addr())
 			return
 		default:
 		}
 
-		ln.SetDeadline(time.Now().Add(s.DeadLineMillisec * time.Millisecond))
-		conn, err := ln.Accept()
+		conn, err := network.Accept()
 		if err != nil {
 			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
 				continue
@@ -81,15 +85,9 @@ func (s *Server) Run() {
 		s.waitQuitGroup.Add(1)
 		s.connStore[conn] = map[string]interface{}{}
 
-		cm := &context.CDataManager{CodecHandle: s.CodecHandle}
+		cm := &context.CDataManager{CodecHandle: config.GetCodecHandle()}
 		go s.handle(s.dispatcher, cm, conn)
 	}
-}
-
-func (s *Server) Shutdown() {
-	close(s.quit)
-	//fmt.Println("Waiting Shutdown...")
-	s.waitQuitGroup.Wait()
 }
 
 // Handles incoming requests.
@@ -109,7 +107,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		}
 
 		//	fmt.Println("start")
-		conn.SetDeadline(time.Now().Add(s.DeadLineMillisec * time.Millisecond))
+		conn.SetDeadline(time.Now().Add(s.Network.GetConfig().GetDeadLineMillisec() * time.Millisecond))
 		data, err := cm.Receive(conn)
 		if err != nil {
 			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
@@ -178,4 +176,10 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		}
 		fmt.Println("end")
 	}
+}
+
+func (s *Server) Shutdown() {
+	close(s.quit)
+	//fmt.Println("Waiting Shutdown...")
+	s.waitQuitGroup.Wait()
 }

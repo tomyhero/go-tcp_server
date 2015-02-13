@@ -1,4 +1,4 @@
-package sv
+package server
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"github.com/tomyhero/ore_server/context"
 	"github.com/tomyhero/ore_server/example/handler"
 	"github.com/tomyhero/ore_server/util"
+	"github.com/ugorji/go/codec"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -34,7 +36,13 @@ func TestTCPServer(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	cl := client.Client{}
+	var h = new(codec.MsgpackHandle)
+	h.MapType = reflect.TypeOf(map[string]interface{}{})
+	h.RawToString = true
+
+	cl := client.Client{
+		CDataManager: &context.CDataManager{CodecHandle: h},
+	}
 	err = cl.Connect(fmt.Sprintf(":%d", port))
 	if err != nil {
 		fmt.Println(err)

@@ -7,7 +7,10 @@ import (
 )
 
 func main() {
-	sv := server.Server{Port: 8080}
+	config := &server.TCPServerConfig{Port: 8080}
+
+	network := &server.TCPNetwork{Config: config}
+	sv := server.NewServer(network)
 	handlers := make([]context.IHandler, 1)
 	handlers[0] = handler.NewEchoHandler()
 	sv.Setup(handlers)
