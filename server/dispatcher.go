@@ -2,8 +2,8 @@ package server
 
 import (
 	"fmt"
-	"github.com/tomyhero/ore_server/context"
-	"github.com/tomyhero/ore_server/util"
+	"github.com/tomyhero/go-tcp_server/context"
+	"github.com/tomyhero/go-tcp_server/util"
 	"reflect"
 	"strings"
 )

@@ -2,8 +2,8 @@ package handler
 
 import (
 	"fmt"
-	"github.com/tomyhero/ore_server/authorizer"
-	"github.com/tomyhero/ore_server/context"
+	"github.com/tomyhero/go-tcp_server/authorizer"
+	"github.com/tomyhero/go-tcp_server/context"
 )
 
 type EchoHandler struct {

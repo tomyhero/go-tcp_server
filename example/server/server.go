@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/tomyhero/ore_server/context"
-	"github.com/tomyhero/ore_server/example/handler"
-	"github.com/tomyhero/ore_server/server"
+	"github.com/tomyhero/go-tcp_server/context"
+	"github.com/tomyhero/go-tcp_server/example/handler"
+	"github.com/tomyhero/go-tcp_server/server"
 )
 
 func main() {

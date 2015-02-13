@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/tomyhero/ore_server/context"
+	"github.com/tomyhero/go-tcp_server/context"
 	"github.com/ugorji/go/codec"
 	"io"
 	"net"

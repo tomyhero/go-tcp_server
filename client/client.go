@@ -1,7 +1,7 @@
 package client
 
 import (
-	. "github.com/tomyhero/ore_server/context"
+	. "github.com/tomyhero/go-tcp_server/context"
 	"net"
 )
 
