@@ -21,11 +21,8 @@ func TestTCPServer(t *testing.T) {
 		t.Fail()
 		return
 	}
-
-	config := &TCPServerConfig{Port: port}
-
-	network := &TCPNetwork{Config: config}
-	sv := NewServer(network)
+	config := &ServerConfig{Port: port}
+	sv := NewServer(config)
 
 	assert.NotNil(t, config)
 

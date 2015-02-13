@@ -32,9 +32,8 @@ func TestChat(t *testing.T) {
 	var ch = new(codec.MsgpackHandle)
 	ch.MapType = reflect.TypeOf(map[string]interface{}{})
 	ch.RawToString = true
-	config := &server.TCPServerConfig{Port: port}
-	network := &server.TCPNetwork{Config: config}
-	sv := server.NewServer(network)
+	config := &server.ServerConfig{Port: port}
+	sv := server.NewServer(config)
 	defer sv.Shutdown()
 
 	handlers := make([]context.IHandler, 1)
