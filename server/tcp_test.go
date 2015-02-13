@@ -1,6 +1,5 @@
 package server
 
-/*
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
@@ -64,4 +63,3 @@ func TestTCPServer(t *testing.T) {
 	res, err := cl.Receive()
 	assert.Equal(t, "echo_Echo_res", res.GetCMD(), "response command ok")
 }
-*/
