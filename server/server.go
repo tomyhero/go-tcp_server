@@ -2,11 +2,11 @@ package server
 
 import (
 	"fmt"
+	"github.com/golang/glog"
 	"github.com/tomyhero/go-tcp_server/context"
 	"github.com/ugorji/go/codec"
 	"io"
 	"net"
-	"os"
 	"reflect"
 	"sync"
 	"time"
@@ -61,35 +61,34 @@ func (s *Server) Setup(handlers []context.IHandler) {
 }
 
 func (s *Server) Run() {
-	defer s.waitQuitGroup.Done()
+	defer func() {
+		glog.Info("End of Run")
+		s.waitQuitGroup.Done()
+	}()
+
 	laddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", s.Config.Port))
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		glog.Fatalf("ResolveTCPAddr Fail: %s", err)
 	}
 
 	ln, err := net.ListenTCP("tcp", laddr)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		glog.Fatalf("ListenTCP Fail: %s", err)
 	}
 
 	defer func() {
 		ln.Close()
+		glog.Info("Listener Closed")
 		s.dispatcher.HookDestroy(s.gstore)
 	}()
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 
 	s.dispatcher.HookInitialize(s.gstore)
 
 	for {
 		select {
 		case <-s.quit:
+			glog.Info("quit Command Received")
 			return
 		default:
 		}
@@ -101,8 +100,7 @@ func (s *Server) Run() {
 			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
 				continue
 			}
-			fmt.Println("Error Accepting", err.Error())
-			os.Exit(1)
+			glog.Fatalf("Accept Fail: %s", err)
 		}
 		s.waitQuitGroup.Add(1)
 		s.connStore[conn] = map[string]interface{}{}
@@ -117,18 +115,18 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 	defer func() {
 		conn.Close()
 		delete(s.connStore, conn)
+		glog.Info("Close Connection")
 	}()
 	defer s.waitQuitGroup.Done()
 
 	for {
 		select {
 		case <-s.quit:
-			//fmt.Println("disconnecting", conn.RemoteAddr())
+			glog.Infof("quit Command Received at Handle %s", conn.RemoteAddr())
 			return
 		default:
 		}
 
-		//	fmt.Println("start")
 		conn.SetDeadline(time.Now().Add(s.Config.DeadLineMillisec * time.Millisecond))
 		data, err := cm.Receive(conn)
 		if err != nil {
@@ -136,17 +134,17 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 				continue
 			}
 			if err == io.EOF {
-				fmt.Println("client dissconected")
+				glog.Infof("Client Dissconected :%s", conn.RemoteAddr())
 				break
 			} else {
-				fmt.Println("receive cdata", err)
+				glog.Infof("Receive Data Failed %s", err)
 				break
 			}
 		}
 
 		c, err := context.NewContext(conn, cm, s.gstore, data, s.connStore)
 		if err != nil {
-			fmt.Println("create context", err)
+			glog.Warningf("Creating Context Failed %s", err)
 			break
 		}
 
@@ -154,8 +152,6 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		// do login
 		if onLogin {
 			c.SetupMyStore()
-			//fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.LoginActions, loginAction)
-
 			ok := loginAction.Call([]reflect.Value{reflect.ValueOf(c)})[0].Bool()
 			if ok {
 				c.Res.Header["STATUS"] = context.STATUS_OK
@@ -164,12 +160,9 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 			}
 			// do auth action 
 		} else {
-
 			action, find := dispatcher.Actions[c.Req.GetCMD()]
-			//fmt.Println(c.Req.GetCMD(), c.Req.Header, dispatcher.Actions, action, find)
 			if find {
 				c.SetupMyStore()
-
 				if dispatcher.ExecAuth(c, c.Req.GetCMD()) {
 
 					// BEFORE_EXECUTE
@@ -192,16 +185,15 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		if c.OnSendResponse {
 			err = cm.Send(conn, c.Res.GetData())
 			if err != nil {
-				fmt.Println("send fail", err)
+				glog.Infof("Sending Data Fail %s", err)
 				break
 			}
 		}
-		fmt.Println("end")
 	}
 }
 
 func (s *Server) Shutdown() {
 	close(s.quit)
-	//fmt.Println("Waiting Shutdown...")
+	glog.Info("Waiting Shutdown....")
 	s.waitQuitGroup.Wait()
 }

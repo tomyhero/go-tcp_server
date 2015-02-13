@@ -1,7 +1,7 @@
 package authorizer
 
 import (
-	"fmt"
+	"github.com/golang/glog"
 	"github.com/tomyhero/go-tcp_server/context"
 	"github.com/tomyhero/go-tcp_server/util"
 )
@@ -18,7 +18,7 @@ func (a AccessToken) Login(c *context.Context) bool {
 	tokenStore := myStore["access_token"].(map[string]interface{})
 	uid, err := util.GenUUID()
 	if err != nil {
-		fmt.Println(err)
+		glog.Warningf("Fail to get UID %s", err)
 		return false
 	}
 	tokenStore[uid] = map[string]interface{}{}

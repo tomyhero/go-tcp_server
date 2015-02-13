@@ -90,9 +90,6 @@ func ReceiveHandler(id int, cl *client.Client, t *testing.T) {
 			fmt.Println("ERROR", err)
 			return
 		}
-
-		fmt.Println("CRes", res.GetCMD())
-
 		switch {
 		case "chat_login_res" == res.GetCMD():
 
@@ -103,7 +100,7 @@ func ReceiveHandler(id int, cl *client.Client, t *testing.T) {
 				hoge = hoge + hoge
 			}
 			hoge = fmt.Sprintf("I am alive! %d %s", id, hoge)
-			fmt.Println(fmt.Sprintf("Send Message Len %d", len(hoge)))
+			//fmt.Println(fmt.Sprintf("Send Message Len %d", len(hoge)))
 			err := cl.Send(&context.CData{
 				Header: map[string]interface{}{"CMD": "chat_Broadcast", "AUTH_ACCESS_TOKEN": accessToken},
 				Body:   map[string]interface{}{"name": fmt.Sprintf("tomyhero_%d", id), "message": hoge},
@@ -117,7 +114,7 @@ func ReceiveHandler(id int, cl *client.Client, t *testing.T) {
 			countBroadcast = countBroadcast + 1
 			return
 		case "chat_message" == res.GetCMD():
-			fmt.Println("Receive Message Len", len(res.Body["message"].(string)))
+			//fmt.Println("Receive Message Len", len(res.Body["message"].(string)))
 			countMessage = countMessage + 1
 		}
 	}

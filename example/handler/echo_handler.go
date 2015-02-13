@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/tomyhero/go-tcp_server/authorizer"
 	"github.com/tomyhero/go-tcp_server/context"
 )
@@ -29,17 +29,17 @@ func (h *EchoHandler) HookDestroy(g map[string]interface{}, myStore map[string]i
 }
 
 func (h *EchoHandler) HookBeforeExecute(c *context.Context) {
-	fmt.Println("Called BeforeExecuteHandler", c.MyStore, c.GStore["echo"])
+	//fmt.Println("Called BeforeExecuteHandler", c.MyStore, c.GStore["echo"])
 	myStore := c.MyStore()
 	myStore["num"] = myStore["num"].(int) + 1
 }
 
 func (h *EchoHandler) HookAfterExecute(c *context.Context) {
-	fmt.Println("Called AfterExecuteHandler")
+	//fmt.Println("Called AfterExecuteHandler")
 }
 
 func (h *EchoHandler) ActionEcho(c *context.Context) (*context.Context, error) {
 	c.Res.Body = c.Req.Body
-	fmt.Println(c, "Echo Echo!", c.MyStore()["num"].(int))
+	//fmt.Println(c, "Echo Echo!", c.MyStore()["num"].(int))
 	return c, nil
 }

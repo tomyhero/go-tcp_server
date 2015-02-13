@@ -8,6 +8,7 @@ This is TCP Server Application Framework.
  INSTALL
 -----------
 
+go get github.com/golang/glog
 go get github.com/stretchr/testify/assert
 go get github.com/ugorji/go/codec
 go get github.com/tomyhero/go-tcp_server

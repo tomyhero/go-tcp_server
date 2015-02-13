@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"fmt"
+	"github.com/golang/glog"
 	"github.com/tomyhero/go-tcp_server/authorizer"
 	"github.com/tomyhero/go-tcp_server/context"
 	//"time"
@@ -51,13 +51,10 @@ func (h *ChatHandler) ActionBroadcast(c *context.Context) {
 		err := c.CDataManager.Send(conn, cdata.GetData())
 		if err != nil {
 			if c.Conn == conn {
-				fmt.Println("MySelf", err)
+				glog.Warningf("Fail to send myself : %s", err)
 			} else {
-				fmt.Println("Somebody", err)
+				glog.Warningf("Fail to send : %s", err)
 			}
 		}
 	}
-
-	//time.Sleep(100 * time.Millisecond)
-
 }

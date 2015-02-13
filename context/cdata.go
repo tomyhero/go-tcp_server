@@ -38,7 +38,6 @@ func (c *CDataManager) Receive(conn net.Conn) (data map[string]interface{}, err 
 				err = errors.New("Unknown panic")
 			}
 			data = nil
-			//fmt.Println("receive error: ", e) // Prints "Whoops: boom!"
 		}
 	}()
 
