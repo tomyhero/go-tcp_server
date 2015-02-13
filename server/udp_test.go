@@ -1,6 +1,5 @@
 package server
 
-/*
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
@@ -14,7 +13,7 @@ import (
 	"time"
 )
 
-func TestTCPServer(t *testing.T) {
+func TestUDPServer(t *testing.T) {
 
 	port, err := util.EmptyPort()
 	if err != nil {
@@ -23,9 +22,9 @@ func TestTCPServer(t *testing.T) {
 		return
 	}
 
-	config := &TCPServerConfig{Port: port}
+	config := &UDPServerConfig{Port: port}
 
-	network := &TCPNetwork{Config: config}
+	network := &UDPNetwork{Config: config}
 	sv := NewServer(network)
 
 	assert.NotNil(t, config)
@@ -64,4 +63,3 @@ func TestTCPServer(t *testing.T) {
 	res, err := cl.Receive()
 	assert.Equal(t, "echo_Echo_res", res.GetCMD(), "response command ok")
 }
-*/

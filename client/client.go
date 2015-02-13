@@ -15,7 +15,7 @@ func (c *Client) Disconnect() {
 }
 func (c *Client) Connect(to string) error {
 
-	conn, err := net.Dial("tcp", to)
+	conn, err := net.Dial("udp", to)
 	if err != nil {
 		return err
 	}
