@@ -1,11 +1,31 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/golang/glog"
 	"github.com/tomyhero/go-tcp_server/authorizer"
 	"github.com/tomyhero/go-tcp_server/context"
 	//"time"
 )
+
+var authAccessToken = authorizer.AccessToken{}
+
+// Authorizer
+type ChatAuthorizer struct {
+}
+
+func (a ChatAuthorizer) Login(c *context.Context) bool {
+	name, hasName := c.Res.Body["name"]
+	if hasName == false {
+		name = "Unknown"
+	}
+	c.MyStore()["name"] = name
+
+	return authAccessToken.Login(c)
+}
+func (a ChatAuthorizer) Auth(c *context.Context) bool {
+	return authAccessToken.Auth(c)
+}
 
 // Setup Section
 
@@ -22,7 +42,7 @@ func (h *ChatHandler) GetAuthorizer() context.IAuthorizer {
 }
 
 func NewChatHandler() *ChatHandler {
-	return &ChatHandler{Authorizer: authorizer.AccessToken{}}
+	return &ChatHandler{Authorizer: ChatAuthorizer{}}
 }
 
 // HOOK Section
@@ -42,9 +62,10 @@ func (h *ChatHandler) HookAfterExecute(c *context.Context) {
 
 func (h *ChatHandler) ActionBroadcast(c *context.Context) {
 
+	fmt.Println("Name", c.MyStore()["name"])
 	cdata := context.CData{
 		Header: map[string]interface{}{"CMD": "chat_message"},
-		Body:   map[string]interface{}{"from": c.Req.Body["name"], "message": c.Req.Body["message"]},
+		Body:   map[string]interface{}{"from": c.MyStore()["name"], "message": c.Req.Body["message"]},
 	}
 
 	for conn, _ := range c.ConnStore {

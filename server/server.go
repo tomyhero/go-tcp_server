@@ -61,6 +61,7 @@ func (s *Server) Setup(handlers []context.IHandler) {
 }
 
 func (s *Server) Run() {
+	fmt.Println("Run Called")
 	defer func() {
 		glog.Info("End of Run")
 		s.waitQuitGroup.Done()
@@ -102,6 +103,9 @@ func (s *Server) Run() {
 			}
 			glog.Fatalf("Accept Fail: %s", err)
 		}
+
+		fmt.Println("Connected")
+
 		s.waitQuitGroup.Add(1)
 		s.connStore[conn] = map[string]interface{}{}
 
@@ -141,6 +145,13 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 				break
 			}
 		}
+
+		_, has_header := data["H"]
+		if has_header == false {
+			continue
+		}
+
+		fmt.Println("data", data)
 
 		c, err := context.NewContext(conn, cm, s.gstore, data, s.connStore)
 		if err != nil {
@@ -183,7 +194,9 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		}
 
 		if c.OnSendResponse {
+			fmt.Println("sending", c.Res.GetData())
 			err = cm.Send(conn, c.Res.GetData())
+			fmt.Println("sent", c.Res.GetData())
 			if err != nil {
 				glog.Infof("Sending Data Fail %s", err)
 				break
