@@ -176,6 +176,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		loginAction, onLogin := dispatcher.LoginActions[c.Req.GetCMD()]
 
 		// TODO reconnectAction
+		// TODO session <- ちゃんとうごいてない
 
 		// do login
 		if onLogin {
