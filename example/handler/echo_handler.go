@@ -21,15 +21,15 @@ func NewEchoHandler() *EchoHandler {
 	return &EchoHandler{Authorizer: authorizer.PlainPassword{Password: "1111"}}
 }
 
-func (h *EchoHandler) HookInitialize(g map[string]interface{}, gstore map[string]interface{}) {
-	gstore["num"] = 0
+func (h *EchoHandler) HookInitialize(g map[string]interface{}, database map[string]interface{}) {
+	database["num"] = 0
 }
-func (h *EchoHandler) HookDestroy(g map[string]interface{}, gstore map[string]interface{}) {
+func (h *EchoHandler) HookDestroy(g map[string]interface{}, database map[string]interface{}) {
 
 }
 
 func (h *EchoHandler) HookBeforeExecute(c *context.Context) {
-	//fmt.Println("Called BeforeExecuteHandler", c.Session, c.GStore["echo"])
+	//fmt.Println("Called BeforeExecuteHandler", c.Session, c.Database["echo"])
 	session := c.Session
 	_, ok := session["num"]
 	if !ok {

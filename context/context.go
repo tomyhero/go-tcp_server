@@ -33,13 +33,13 @@ type Context struct {
 	Res            *CData
 	Conn           net.Conn
 	CDataManager   *CDataManager
-	GStore         map[string]interface{}
+	Database       map[string]interface{}
 	Conns          map[net.Conn]interface{}
 	Session        map[string]interface{}
 	OnSendResponse bool
 }
 
-func NewContext(conn net.Conn, cDataManager *CDataManager, gstore map[string]interface{}, data map[string]interface{}, conns map[net.Conn]interface{}) (*Context, error) {
+func NewContext(conn net.Conn, cDataManager *CDataManager, database map[string]interface{}, data map[string]interface{}, conns map[net.Conn]interface{}) (*Context, error) {
 	req, err := CreateReq(data)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func NewContext(conn net.Conn, cDataManager *CDataManager, gstore map[string]int
 
 	context := &Context{
 		Conn:           conn,
-		GStore:         gstore,
+		Database:       database,
 		Req:            req,
 		Res:            CreateRes(req.GetCMD()),
 		CDataManager:   cDataManager,
@@ -61,11 +61,11 @@ func (c *Context) SetupSession() {
 	prefix := strings.Split(c.Req.GetCMD(), "_")[0]
 	uid := fmt.Sprint(c.Conns[c.Conn].(map[string]interface{})["uid"])
 
-	_, ok := c.GStore[prefix].(map[string]interface{})[uid]
+	_, ok := c.Database[prefix].(map[string]interface{})[uid]
 	if !ok {
-		c.GStore[prefix].(map[string]interface{})[uid] = map[string]interface{}{}
+		c.Database[prefix].(map[string]interface{})[uid] = map[string]interface{}{}
 	}
-	c.Session = c.GStore[prefix].(map[string]interface{})[uid].(map[string]interface{})
+	c.Session = c.Database[prefix].(map[string]interface{})[uid].(map[string]interface{})
 }
 
 func CreateRes(reqCmd string) *CData {
