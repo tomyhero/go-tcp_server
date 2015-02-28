@@ -56,8 +56,8 @@ func (h *EchoHandler) HookAfterExecute(c *context.Context) {
 // echo_Echo コマンドで実行される。
 func (h *EchoHandler) ActionEcho(c *context.Context) (*context.Context, error) {
 	c.Res.Body = c.Req.Body
-	//fmt.Println(c.Req.Body["text"], c.Session["num"].(int))
-	fmt.Println(c.Req.Body["text"])
+	fmt.Println(c.Req.Body["text"], c.Session["num"].(int))
+	//fmt.Println(c.Req.Body["text"])
 
 	for conn, _ := range c.Conns {
 		err := c.CDataManager.Send(conn, c.Res.GetData())

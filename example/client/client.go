@@ -29,8 +29,18 @@ func main() {
 		Body:   map[string]interface{}{"text": "Hello World\n"},
 	})
 
-	//for {
+	//	for {
 	cdata, err := cl.Receive()
+	fmt.Println(cdata, err)
+	//}
+
+	err = cl.Send(&context.CData{
+		Header: map[string]interface{}{"CMD": "echo_Echo", "AUTH_PLAIN_PASSWORD": "1111"},
+		Body:   map[string]interface{}{"text": "こんにちは\n"},
+	})
+
+	//	for {
+	cdata, err = cl.Receive()
 	fmt.Println(cdata, err)
 	//}
 
