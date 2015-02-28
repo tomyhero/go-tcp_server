@@ -1,4 +1,4 @@
-TCP Stream Server Application Framework. 
+TCP Server Application Framework. 
 ========================================================
 
 もくてき
@@ -60,6 +60,7 @@ func (h *EchoHandler) ActionEcho(c *context.Context) (*context.Context, error) {
 
 ```
 
+サーバー
 
 ```go
 package main
@@ -81,6 +82,8 @@ func main() {
 }
 
 ```
+
+クライアント
 
 ```go
 package main
