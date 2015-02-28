@@ -1,6 +1,7 @@
 package context
 
 import (
+	"fmt"
 	"net"
 	"strings"
 )
@@ -16,8 +17,8 @@ const (
 type IHandler interface {
 	Prefix() string
 	GetAuthorizer() IAuthorizer
-	HookInitialize(g map[string]interface{}, myStore map[string]interface{})
-	HookDestroy(g map[string]interface{}, myStore map[string]interface{})
+	HookInitialize(g map[string]interface{}, sesison map[string]interface{})
+	HookDestroy(g map[string]interface{}, session map[string]interface{})
 	HookBeforeExecute(c *Context)
 	HookAfterExecute(c *Context)
 }
@@ -33,12 +34,12 @@ type Context struct {
 	Conn           net.Conn
 	CDataManager   *CDataManager
 	GStore         map[string]interface{}
-	ConnStore      map[net.Conn]interface{}
-	myStore        map[string]interface{}
+	Conns          map[net.Conn]interface{}
+	Session        map[string]interface{}
 	OnSendResponse bool
 }
 
-func NewContext(conn net.Conn, cDataManager *CDataManager, gstore map[string]interface{}, data map[string]interface{}, connStore map[net.Conn]interface{}) (*Context, error) {
+func NewContext(conn net.Conn, cDataManager *CDataManager, gstore map[string]interface{}, data map[string]interface{}, conns map[net.Conn]interface{}) (*Context, error) {
 	req, err := CreateReq(data)
 	if err != nil {
 		return nil, err
@@ -50,18 +51,21 @@ func NewContext(conn net.Conn, cDataManager *CDataManager, gstore map[string]int
 		Req:            req,
 		Res:            CreateRes(req.GetCMD()),
 		CDataManager:   cDataManager,
-		ConnStore:      connStore,
+		Conns:          conns,
 		OnSendResponse: true,
 	}
 	return context, nil
 }
 
-func (c *Context) SetupMyStore() {
+func (c *Context) SetupSession() {
 	prefix := strings.Split(c.Req.GetCMD(), "_")[0]
-	c.myStore = c.GStore[prefix].(map[string]interface{})
-}
-func (c *Context) MyStore() map[string]interface{} {
-	return c.myStore
+	uid := fmt.Sprint(c.Conns[c.Conn].(map[string]interface{})["uid"])
+
+	_, ok := c.GStore[prefix].(map[string]interface{})[uid]
+	if !ok {
+		c.GStore[prefix].(map[string]interface{})[uid] = map[string]interface{}{}
+	}
+	c.Session = c.GStore[prefix].(map[string]interface{})[uid].(map[string]interface{})
 }
 
 func CreateRes(reqCmd string) *CData {

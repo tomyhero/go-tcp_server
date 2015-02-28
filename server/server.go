@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/tomyhero/go-tcp_server/context"
+	"github.com/tomyhero/go-tcp_server/util"
 	"github.com/ugorji/go/codec"
 	"io"
 	"net"
@@ -48,7 +49,7 @@ type Server struct {
 	gstore        map[string]interface{}   // global data storage
 	quit          chan bool                // chan for quit trigger.
 	waitQuitGroup *sync.WaitGroup          // wait for graceful stop
-	connStore     map[net.Conn]interface{} // store all connection related data
+	conns         map[net.Conn]interface{} // store all connection related data
 	Config        *ServerConfig
 }
 
@@ -62,7 +63,7 @@ func (s *Server) Setup(handlers []context.IHandler) {
 	s.waitQuitGroup = &sync.WaitGroup{}
 	s.dispatcher = NewDispatcher(handlers)
 	s.gstore = map[string]interface{}{}
-	s.connStore = map[net.Conn]interface{}{}
+	s.conns = map[net.Conn]interface{}{}
 	s.waitQuitGroup.Add(1)
 }
 
@@ -113,7 +114,16 @@ func (s *Server) Run() {
 		glog.Infof("Connected %s", conn)
 
 		s.waitQuitGroup.Add(1)
-		s.connStore[conn] = map[string]interface{}{}
+		uid, err := util.GenUUID()
+
+		if err != nil {
+			glog.Warningf("GenUUID Fail: %s", err)
+			continue
+		}
+
+		// TODO reconnecting
+		s.conns[conn] = map[string]interface{}{}
+		s.conns[conn].(map[string]interface{})["uid"] = uid
 
 		cm := &context.CDataManager{CodecHandle: s.Config.CodecHandle}
 		go s.handle(s.dispatcher, cm, conn)
@@ -124,7 +134,7 @@ func (s *Server) Run() {
 func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn net.Conn) {
 	defer func() {
 		conn.Close()
-		delete(s.connStore, conn)
+		delete(s.conns, conn)
 		glog.Info("Close Connection")
 	}()
 	defer s.waitQuitGroup.Done()
@@ -157,7 +167,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 			continue
 		}
 
-		c, err := context.NewContext(conn, cm, s.gstore, data, s.connStore)
+		c, err := context.NewContext(conn, cm, s.gstore, data, s.conns)
 		if err != nil {
 			glog.Warningf("Creating Context Failed %s", err)
 			break
@@ -166,7 +176,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		loginAction, onLogin := dispatcher.LoginActions[c.Req.GetCMD()]
 		// do login
 		if onLogin {
-			c.SetupMyStore()
+			c.SetupSession()
 			ok := loginAction.Call([]reflect.Value{reflect.ValueOf(c)})[0].Bool()
 			if ok {
 				c.Res.Header["STATUS"] = context.STATUS_OK
@@ -177,7 +187,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		} else {
 			action, find := dispatcher.Actions[c.Req.GetCMD()]
 			if find {
-				c.SetupMyStore()
+				c.SetupSession()
 				if dispatcher.ExecAuth(c, c.Req.GetCMD()) {
 
 					// BEFORE_EXECUTE

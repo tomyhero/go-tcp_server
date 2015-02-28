@@ -17,7 +17,7 @@ func (a ChatAuthorizer) Login(c *context.Context) bool {
 	if hasName == false {
 		name = "Unknown"
 	}
-	c.MyStore()["name"] = name
+	c.Session["name"] = name
 
 	return authAccessToken.Login(c)
 }
@@ -44,9 +44,9 @@ func NewChatHandler() *ChatHandler {
 
 // チャットサーバのHOOK。必要に応じて活用。
 
-func (h *ChatHandler) HookInitialize(g map[string]interface{}, myStore map[string]interface{}) {
+func (h *ChatHandler) HookInitialize(g map[string]interface{}, gstore map[string]interface{}) {
 }
-func (h *ChatHandler) HookDestroy(g map[string]interface{}, myStore map[string]interface{}) {
+func (h *ChatHandler) HookDestroy(g map[string]interface{}, gstore map[string]interface{}) {
 }
 
 func (h *ChatHandler) HookBeforeExecute(c *context.Context) {
@@ -61,10 +61,10 @@ func (h *ChatHandler) ActionBroadcast(c *context.Context) {
 
 	cdata := context.CData{
 		Header: map[string]interface{}{"CMD": "chat_message"},
-		Body:   map[string]interface{}{"from": c.MyStore()["name"], "message": c.Req.Body["message"]},
+		Body:   map[string]interface{}{"from": c.Session["name"], "message": c.Req.Body["message"]},
 	}
 
-	for conn, _ := range c.ConnStore {
+	for conn, _ := range c.Conns {
 		err := c.CDataManager.Send(conn, cdata.GetData())
 		if err != nil {
 			if c.Conn == conn {

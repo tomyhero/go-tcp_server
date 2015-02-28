@@ -10,12 +10,12 @@ type AccessToken struct {
 }
 
 func (a AccessToken) Login(c *context.Context) bool {
-	myStore := c.MyStore()
-	_, has := myStore["access_token"]
+	session := c.Session
+	_, has := session["access_token"]
 	if !has {
-		myStore["access_token"] = map[string]interface{}{}
+		session["access_token"] = map[string]interface{}{}
 	}
-	tokenStore := myStore["access_token"].(map[string]interface{})
+	tokenStore := session["access_token"].(map[string]interface{})
 	uid, err := util.GenUUID()
 	if err != nil {
 		glog.Warningf("Fail to get UID %s", err)
@@ -24,8 +24,8 @@ func (a AccessToken) Login(c *context.Context) bool {
 	tokenStore[uid] = map[string]interface{}{}
 	c.Res.Body["AUTH_ACCESS_TOKEN"] = uid
 
-	myConnStore := c.ConnStore[c.Conn].(map[string]interface{})
-	myConnStore["AUTH_ACCESS_TOKEN"] = uid
+	myConn := c.Conns[c.Conn].(map[string]interface{})
+	myConn["AUTH_ACCESS_TOKEN"] = uid
 
 	return true
 }
@@ -35,7 +35,7 @@ func (a AccessToken) Auth(c *context.Context) bool {
 	if !has {
 		return false
 	}
-	if accessToken == c.ConnStore[c.Conn].(map[string]interface{})["AUTH_ACCESS_TOKEN"] {
+	if accessToken == c.Conns[c.Conn].(map[string]interface{})["AUTH_ACCESS_TOKEN"] {
 		return true
 	}
 	return false
