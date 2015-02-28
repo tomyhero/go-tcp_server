@@ -21,7 +21,7 @@ func TestTCPServer(t *testing.T) {
 		t.Fail()
 		return
 	}
-	config := &ServerConfig{Port: port}
+	config := &ServerConfig{Port: port, AcceptWaitingTime: 1}
 	sv := NewServer(config)
 
 	assert.NotNil(t, config)

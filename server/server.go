@@ -13,12 +13,14 @@ import (
 )
 
 type ServerConfig struct {
-	Port             int
-	CodecHandle      codec.Handle
-	DeadLineMillisec time.Duration
+	Port              int
+	CodecHandle       codec.Handle
+	ConnectTimeout    int
+	AcceptWaitingTime int // XXX name
 }
 
 func (config *ServerConfig) LoadDefault() {
+
 	if config.Port == 0 {
 		config.Port = 8081
 	}
@@ -30,8 +32,12 @@ func (config *ServerConfig) LoadDefault() {
 		config.CodecHandle = h
 	}
 
-	if config.DeadLineMillisec == 0 {
-		config.DeadLineMillisec = 1000 // 1 sec
+	if config.ConnectTimeout == 0 {
+		config.ConnectTimeout = 2 // 2 sec
+	}
+
+	if config.AcceptWaitingTime == 0 {
+		config.AcceptWaitingTime = 60 // 60 sec
 	}
 }
 
@@ -61,7 +67,7 @@ func (s *Server) Setup(handlers []context.IHandler) {
 }
 
 func (s *Server) Run() {
-	fmt.Println("Run Called")
+	glog.Info("Run Called")
 	defer func() {
 		glog.Info("End of Run")
 		s.waitQuitGroup.Done()
@@ -85,6 +91,7 @@ func (s *Server) Run() {
 	}()
 
 	s.dispatcher.HookInitialize(s.gstore)
+	ln.SetDeadline(time.Now().Add(time.Second * time.Duration(s.Config.AcceptWaitingTime)))
 
 	for {
 		select {
@@ -94,8 +101,7 @@ func (s *Server) Run() {
 		default:
 		}
 
-		ln.SetDeadline(time.Now().Add(s.Config.DeadLineMillisec * time.Millisecond))
-		conn, err := ln.Accept()
+		conn, err := ln.AcceptTCP()
 
 		if err != nil {
 			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
@@ -104,7 +110,7 @@ func (s *Server) Run() {
 			glog.Fatalf("Accept Fail: %s", err)
 		}
 
-		fmt.Println("Connected")
+		glog.Infof("Connected %s", conn)
 
 		s.waitQuitGroup.Add(1)
 		s.connStore[conn] = map[string]interface{}{}
@@ -131,7 +137,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		default:
 		}
 
-		conn.SetDeadline(time.Now().Add(s.Config.DeadLineMillisec * time.Millisecond))
+		conn.SetReadDeadline(time.Now().Add(time.Second * time.Duration(s.Config.ConnectTimeout)))
 		data, err := cm.Receive(conn)
 		if err != nil {
 			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
@@ -151,8 +157,6 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 			continue
 		}
 
-		fmt.Println("data", data)
-
 		c, err := context.NewContext(conn, cm, s.gstore, data, s.connStore)
 		if err != nil {
 			glog.Warningf("Creating Context Failed %s", err)
@@ -169,7 +173,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 			} else {
 				c.Res.Header["STATUS"] = context.STATUS_NOT_OK
 			}
-			// do auth action 
+			// do auth action
 		} else {
 			action, find := dispatcher.Actions[c.Req.GetCMD()]
 			if find {
@@ -194,9 +198,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		}
 
 		if c.OnSendResponse {
-			fmt.Println("sending", c.Res.GetData())
 			err = cm.Send(conn, c.Res.GetData())
-			fmt.Println("sent", c.Res.GetData())
 			if err != nil {
 				glog.Infof("Sending Data Fail %s", err)
 				break

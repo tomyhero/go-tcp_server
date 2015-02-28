@@ -32,7 +32,7 @@ func TestChat(t *testing.T) {
 	var ch = new(codec.MsgpackHandle)
 	ch.MapType = reflect.TypeOf(map[string]interface{}{})
 	ch.RawToString = true
-	config := &server.ServerConfig{Port: port}
+	config := &server.ServerConfig{Port: port, AcceptWaitingTime: 1}
 	sv := server.NewServer(config)
 	defer sv.Shutdown()
 

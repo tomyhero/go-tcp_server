@@ -1,18 +1,16 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/golang/glog"
 	"github.com/tomyhero/go-tcp_server/authorizer"
 	"github.com/tomyhero/go-tcp_server/context"
-	//"time"
 )
 
 var authAccessToken = authorizer.AccessToken{}
 
 // Authorizer
-type ChatAuthorizer struct {
-}
+// 名前でログインして、アクセストークン認証を活用する(AUTH_ACCESS_TOKENを返却するので、それを次回からヘッダーにつけて認証をおこなう）
+type ChatAuthorizer struct{}
 
 func (a ChatAuthorizer) Login(c *context.Context) bool {
 	name, hasName := c.Res.Body["name"]
@@ -27,8 +25,7 @@ func (a ChatAuthorizer) Auth(c *context.Context) bool {
 	return authAccessToken.Auth(c)
 }
 
-// Setup Section
-
+// チャットサーバ準備
 type ChatHandler struct {
 	Authorizer context.IAuthorizer
 }
@@ -45,7 +42,7 @@ func NewChatHandler() *ChatHandler {
 	return &ChatHandler{Authorizer: ChatAuthorizer{}}
 }
 
-// HOOK Section
+// チャットサーバのHOOK。必要に応じて活用。
 
 func (h *ChatHandler) HookInitialize(g map[string]interface{}, myStore map[string]interface{}) {
 }
@@ -58,11 +55,10 @@ func (h *ChatHandler) HookBeforeExecute(c *context.Context) {
 func (h *ChatHandler) HookAfterExecute(c *context.Context) {
 }
 
-// Action Section
+// チャットのロジック。
 
 func (h *ChatHandler) ActionBroadcast(c *context.Context) {
 
-	fmt.Println("Name", c.MyStore()["name"])
 	cdata := context.CData{
 		Header: map[string]interface{}{"CMD": "chat_message"},
 		Body:   map[string]interface{}{"from": c.MyStore()["name"], "message": c.Req.Body["message"]},
