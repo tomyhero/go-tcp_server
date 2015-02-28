@@ -27,7 +27,7 @@ func EmptyPort() (int, error) {
 	return port, nil
 }
 
-func GetMethods(actions map[string]reflect.Value, in interface{}) {
+func SetAction(actions map[string]reflect.Value, in interface{}) {
 	t := reflect.TypeOf(in)
 	prefix := reflect.ValueOf(in).MethodByName("Prefix").Call([]reflect.Value{})[0]
 	for i := 0; i < t.NumMethod(); i++ {

@@ -8,6 +8,10 @@ type PlainPassword struct {
 	Password string
 }
 
+func (a PlainPassword) Reconnect(c *context.Context) bool {
+	return true
+}
+
 func (a PlainPassword) Login(c *context.Context) bool {
 	// do nothing
 	return true

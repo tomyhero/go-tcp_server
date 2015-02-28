@@ -174,9 +174,12 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 		}
 
 		loginAction, onLogin := dispatcher.LoginActions[c.Req.GetCMD()]
+
+		// TODO reconnectAction
+
 		// do login
 		if onLogin {
-			c.SetupSession()
+			c.PrepareSession()
 			ok := loginAction.Call([]reflect.Value{reflect.ValueOf(c)})[0].Bool()
 			if ok {
 				c.Res.Header["STATUS"] = context.STATUS_OK
@@ -185,25 +188,41 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 			}
 			// do auth action
 		} else {
-			action, find := dispatcher.Actions[c.Req.GetCMD()]
-			if find {
-				c.SetupSession()
-				if dispatcher.ExecAuth(c, c.Req.GetCMD()) {
 
-					// BEFORE_EXECUTE
-					dispatcher.BeforeExecute(c, c.Req.GetCMD())
+			reconnectAction, onReconnect := dispatcher.ReconnectActions[c.Req.GetCMD()]
 
-					action.Call([]reflect.Value{reflect.ValueOf(c)})
+			if onReconnect {
+				// TODO TODO TODO TODO XXX overwrite uid
+
+				c.PrepareSession()
+				ok := reconnectAction.Call([]reflect.Value{reflect.ValueOf(c)})[0].Bool()
+				if ok {
 					c.Res.Header["STATUS"] = context.STATUS_OK
-
-					// AFTER_EXECUTE
-					dispatcher.AfterExecute(c, c.Req.GetCMD())
-
 				} else {
-					c.Res.Header["STATUS"] = context.STATUS_FORBIDDEN
+					c.Res.Header["STATUS"] = context.STATUS_NOT_OK
 				}
+
 			} else {
-				c.Res.Header["STATUS"] = context.STATUS_COMMAND_NOT_FOUND
+				action, find := dispatcher.Actions[c.Req.GetCMD()]
+				if find {
+					c.PrepareSession()
+					if dispatcher.ExecAuth(c, c.Req.GetCMD()) {
+
+						// BEFORE_EXECUTE
+						dispatcher.BeforeExecute(c, c.Req.GetCMD())
+
+						action.Call([]reflect.Value{reflect.ValueOf(c)})
+						c.Res.Header["STATUS"] = context.STATUS_OK
+
+						// AFTER_EXECUTE
+						dispatcher.AfterExecute(c, c.Req.GetCMD())
+
+					} else {
+						c.Res.Header["STATUS"] = context.STATUS_FORBIDDEN
+					}
+				} else {
+					c.Res.Header["STATUS"] = context.STATUS_COMMAND_NOT_FOUND
+				}
 			}
 		}
 

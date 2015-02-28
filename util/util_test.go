@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGetMethods(t *testing.T) {
+func TestSetActions(t *testing.T) {
 	actions := map[string]reflect.Value{}
 	Getactions(actions,&exsample.EchoHandler{})
 	c := &server.Context{}

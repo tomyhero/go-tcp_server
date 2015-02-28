@@ -9,10 +9,11 @@ import (
 )
 
 type Dispatcher struct {
-	Handlers     []context.IHandler
-	mapHandlers  map[string]context.IHandler
-	Actions      map[string]reflect.Value
-	LoginActions map[string]reflect.Value
+	Handlers         []context.IHandler
+	mapHandlers      map[string]context.IHandler
+	Actions          map[string]reflect.Value
+	LoginActions     map[string]reflect.Value
+	ReconnectActions map[string]reflect.Value
 }
 
 func (d *Dispatcher) ExecAuth(c *context.Context, cmd string) bool {
@@ -28,15 +29,21 @@ func (d *Dispatcher) GetHandler(prefix string) context.IHandler {
 func NewDispatcher(handlers []context.IHandler) *Dispatcher {
 	actions := map[string]reflect.Value{}
 	loginActions := map[string]reflect.Value{}
+	reconnectActions := map[string]reflect.Value{}
 	mapHandlers := map[string]context.IHandler{}
 
 	for _, handler := range handlers {
 		mapHandlers[handler.Prefix()] = handler
-		util.GetMethods(actions, handler)
+		util.SetAction(actions, handler)
+
 		login_field_name := fmt.Sprintf("%s_login", handler.Prefix())
 		loginActions[login_field_name] = reflect.ValueOf(handler.GetAuthorizer()).MethodByName("Login")
+
+		reconnect_field_name := fmt.Sprintf("%s_reconnect", handler.Prefix())
+		reconnectActions[reconnect_field_name] = reflect.ValueOf(handler.GetAuthorizer()).MethodByName("Reconnect")
 	}
-	return &Dispatcher{Handlers: handlers, mapHandlers: mapHandlers, Actions: actions, LoginActions: loginActions}
+
+	return &Dispatcher{Handlers: handlers, mapHandlers: mapHandlers, Actions: actions, LoginActions: loginActions, ReconnectActions: reconnectActions}
 }
 
 func (d *Dispatcher) BeforeExecute(c *context.Context, cmd string) {

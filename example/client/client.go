@@ -29,8 +29,9 @@ func main() {
 		Body:   map[string]interface{}{"text": "Hello World\n"},
 	})
 
+	//for {
 	cdata, err := cl.Receive()
-
 	fmt.Println(cdata, err)
+	//}
 
 }

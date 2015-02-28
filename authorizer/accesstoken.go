@@ -9,6 +9,10 @@ import (
 type AccessToken struct {
 }
 
+func (a AccessToken) Reconnect(c *context.Context) bool {
+	// TODO
+	return true
+}
 func (a AccessToken) Login(c *context.Context) bool {
 	session := c.Session
 	_, has := session["access_token"]

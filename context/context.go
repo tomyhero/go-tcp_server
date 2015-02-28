@@ -57,7 +57,7 @@ func NewContext(conn net.Conn, cDataManager *CDataManager, database map[string]i
 	return context, nil
 }
 
-func (c *Context) SetupSession() {
+func (c *Context) PrepareSession() {
 	prefix := strings.Split(c.Req.GetCMD(), "_")[0]
 	uid := fmt.Sprint(c.Conns[c.Conn].(map[string]interface{})["uid"])
 
