@@ -17,8 +17,8 @@ const (
 type IHandler interface {
 	Prefix() string
 	GetAuthorizer() IAuthorizer
-	HookInitialize(g map[string]interface{}, sesison map[string]interface{})
-	HookDestroy(g map[string]interface{}, session map[string]interface{})
+	HookInitialize(database map[string]interface{})
+	HookDestroy(database map[string]interface{})
 	HookBeforeExecute(c *Context)
 	HookAfterExecute(c *Context)
 }

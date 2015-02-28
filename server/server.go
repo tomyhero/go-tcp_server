@@ -46,7 +46,7 @@ func (config *ServerConfig) LoadDefault() {
 
 type Server struct {
 	dispatcher    *Dispatcher              // hold handlers and dispatch to it
-	gstore        map[string]interface{}   // global data storage
+	database      map[string]interface{}   // global data storage
 	quit          chan bool                // chan for quit trigger.
 	waitQuitGroup *sync.WaitGroup          // wait for graceful stop
 	conns         map[net.Conn]interface{} // store all connection related data
@@ -62,7 +62,7 @@ func (s *Server) Setup(handlers []context.IHandler) {
 	s.quit = make(chan bool)
 	s.waitQuitGroup = &sync.WaitGroup{}
 	s.dispatcher = NewDispatcher(handlers)
-	s.gstore = map[string]interface{}{}
+	s.database = map[string]interface{}{}
 	s.conns = map[net.Conn]interface{}{}
 	s.waitQuitGroup.Add(1)
 }
@@ -88,10 +88,10 @@ func (s *Server) Run() {
 	defer func() {
 		ln.Close()
 		glog.Info("Listener Closed")
-		s.dispatcher.HookDestroy(s.gstore)
+		s.dispatcher.HookDestroy(s.database)
 	}()
 
-	s.dispatcher.HookInitialize(s.gstore)
+	s.dispatcher.HookInitialize(s.database)
 	ln.SetDeadline(time.Now().Add(time.Second * time.Duration(s.Config.AcceptWaitingTime)))
 
 	for {
@@ -167,7 +167,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 			continue
 		}
 
-		c, err := context.NewContext(conn, cm, s.gstore, data, s.conns)
+		c, err := context.NewContext(conn, cm, s.database, data, s.conns)
 		if err != nil {
 			glog.Warningf("Creating Context Failed %s", err)
 			break

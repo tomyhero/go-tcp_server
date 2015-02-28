@@ -51,17 +51,14 @@ func (d *Dispatcher) AfterExecute(c *context.Context, cmd string) {
 	handler.HookAfterExecute(c)
 }
 
-func (d *Dispatcher) HookInitialize(gstore map[string]interface{}) {
+func (d *Dispatcher) HookInitialize(database map[string]interface{}) {
 	for _, handler := range d.Handlers {
-		myStore := map[string]interface{}{}
-		gstore[handler.Prefix()] = myStore
-		handler.HookInitialize(gstore, myStore)
+		database[handler.Prefix()] = map[string]interface{}{}
+		handler.HookInitialize(database)
 	}
 }
-func (d *Dispatcher) HookDestroy(gstore map[string]interface{}) {
+func (d *Dispatcher) HookDestroy(database map[string]interface{}) {
 	for _, handler := range d.Handlers {
-
-		myStore := gstore[handler.Prefix()].(map[string]interface{})
-		handler.HookDestroy(gstore, myStore)
+		handler.HookDestroy(database)
 	}
 }

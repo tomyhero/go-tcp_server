@@ -21,11 +21,10 @@ func NewEchoHandler() *EchoHandler {
 	return &EchoHandler{Authorizer: authorizer.PlainPassword{Password: "1111"}}
 }
 
-func (h *EchoHandler) HookInitialize(g map[string]interface{}, database map[string]interface{}) {
-	database["num"] = 0
+func (h *EchoHandler) HookInitialize(database map[string]interface{}) {
 }
-func (h *EchoHandler) HookDestroy(g map[string]interface{}, database map[string]interface{}) {
 
+func (h *EchoHandler) HookDestroy(database map[string]interface{}) {
 }
 
 func (h *EchoHandler) HookBeforeExecute(c *context.Context) {

@@ -44,9 +44,9 @@ func NewChatHandler() *ChatHandler {
 
 // チャットサーバのHOOK。必要に応じて活用。
 
-func (h *ChatHandler) HookInitialize(g map[string]interface{}, gstore map[string]interface{}) {
+func (h *ChatHandler) HookInitialize(database map[string]interface{}) {
 }
-func (h *ChatHandler) HookDestroy(g map[string]interface{}, gstore map[string]interface{}) {
+func (h *ChatHandler) HookDestroy(database map[string]interface{}) {
 }
 
 func (h *ChatHandler) HookBeforeExecute(c *context.Context) {
