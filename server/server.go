@@ -113,18 +113,17 @@ func (s *Server) Run() {
 
 		glog.Infof("Connected %s", conn)
 
-		s.waitQuitGroup.Add(1)
-		uid, err := util.GenUUID()
+		sessionID, err := util.GenUUID()
 
 		if err != nil {
 			glog.Warningf("GenUUID Fail: %s", err)
 			continue
 		}
 
-		// TODO reconnecting
 		s.conns[conn] = map[string]interface{}{}
-		s.conns[conn].(map[string]interface{})["uid"] = uid
+		s.conns[conn].(map[string]interface{})["session_id"] = sessionID
 
+		s.waitQuitGroup.Add(1)
 		cm := &context.CDataManager{CodecHandle: s.Config.CodecHandle}
 		go s.handle(s.dispatcher, cm, conn)
 	}

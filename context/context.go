@@ -57,15 +57,19 @@ func NewContext(conn net.Conn, cDataManager *CDataManager, database map[string]i
 	return context, nil
 }
 
+func (c *Context) SessionID() string {
+	return fmt.Sprint(c.Conns[c.Conn].(map[string]interface{})["session_id"])
+}
+
 func (c *Context) PrepareSession() {
 	prefix := strings.Split(c.Req.GetCMD(), "_")[0]
-	uid := fmt.Sprint(c.Conns[c.Conn].(map[string]interface{})["uid"])
+	sessionID := c.SessionID()
 
-	_, ok := c.Database[prefix].(map[string]interface{})[uid]
+	_, ok := c.Database[prefix].(map[string]interface{})[sessionID]
 	if !ok {
-		c.Database[prefix].(map[string]interface{})[uid] = map[string]interface{}{}
+		c.Database[prefix].(map[string]interface{})[sessionID] = map[string]interface{}{}
 	}
-	c.Session = c.Database[prefix].(map[string]interface{})[uid].(map[string]interface{})
+	c.Session = c.Database[prefix].(map[string]interface{})[sessionID].(map[string]interface{})
 }
 
 func CreateRes(reqCmd string) *CData {
