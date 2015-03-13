@@ -9,14 +9,13 @@ type AccessToken struct {
 
 func (a AccessToken) Reconnect(c *context.Context) bool {
 
-	/*
-		sessionID, has := c.Res.Body["SESSION_ID"]
-		if !has {
-			return false
-		}
-	*/
+	sessionID, has := c.Req.Header["AUTH_ACCESS_TOKEN"]
 
-	// TODO
+	if !has {
+		return false
+	}
+
+	c.SetSessionID(sessionID.(string))
 
 	return true
 }
@@ -30,7 +29,8 @@ func (a AccessToken) Auth(c *context.Context) bool {
 	if !has {
 		return false
 	}
-	if accessToken == c.Conns[c.Conn].(map[string]interface{})["session_id"] {
+
+	if accessToken == c.SessionID() {
 		return true
 	}
 	return false

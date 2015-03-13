@@ -174,8 +174,6 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 
 		loginAction, onLogin := dispatcher.LoginActions[c.Req.GetCMD()]
 
-		// TODO reconnectAction
-
 		// do login
 		if onLogin {
 			c.PrepareSession()
@@ -191,9 +189,7 @@ func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn n
 			reconnectAction, onReconnect := dispatcher.ReconnectActions[c.Req.GetCMD()]
 
 			if onReconnect {
-				// TODO TODO TODO TODO XXX overwrite uid
-
-				c.PrepareSession()
+				//c.PrepareSession()
 				ok := reconnectAction.Call([]reflect.Value{reflect.ValueOf(c)})[0].Bool()
 				if ok {
 					c.Res.Header["STATUS"] = context.STATUS_OK

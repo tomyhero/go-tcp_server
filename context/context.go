@@ -61,6 +61,10 @@ func (c *Context) SessionID() string {
 	return fmt.Sprint(c.Conns[c.Conn].(map[string]interface{})["session_id"])
 }
 
+func (c *Context) SetSessionID(s string) {
+	c.Conns[c.Conn].(map[string]interface{})["session_id"] = s
+}
+
 func (c *Context) PrepareSession() {
 	prefix := strings.Split(c.Req.GetCMD(), "_")[0]
 	sessionID := c.SessionID()
