@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/tomyhero/go-tcp_server/context"
 	"github.com/tomyhero/go-tcp_server/util"
+	"net"
 	"reflect"
 	"strings"
 )
@@ -67,5 +68,10 @@ func (d *Dispatcher) HookInitialize(database map[string]interface{}) {
 func (d *Dispatcher) HookDestroy(database map[string]interface{}) {
 	for _, handler := range d.Handlers {
 		handler.HookDestroy(database)
+	}
+}
+func (d *Dispatcher) HookDisconnect(conn net.Conn) {
+	for _, handler := range d.Handlers {
+		handler.HookDisconnect(conn)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/tomyhero/go-tcp_server/authorizer"
 	"github.com/tomyhero/go-tcp_server/context"
+	"net"
 )
 
 var authAccessToken = authorizer.AccessToken{}
@@ -53,6 +54,9 @@ func (h *ChatHandler) HookBeforeExecute(c *context.Context) {
 }
 
 func (h *ChatHandler) HookAfterExecute(c *context.Context) {
+}
+func (h *ChatHandler) HookDisconnect(conn net.Conn) {
+
 }
 
 // チャットのロジック。

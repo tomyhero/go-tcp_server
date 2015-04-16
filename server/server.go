@@ -132,6 +132,7 @@ func (s *Server) Run() {
 // Handles incoming requests.
 func (s *Server) handle(dispatcher *Dispatcher, cm *context.CDataManager, conn net.Conn) {
 	defer func() {
+		dispatcher.HookDisconnect(conn)
 		conn.Close()
 		delete(s.conns, conn)
 		glog.Info("Close Connection")

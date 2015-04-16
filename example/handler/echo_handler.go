@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/tomyhero/go-tcp_server/authorizer"
 	"github.com/tomyhero/go-tcp_server/context"
+	"net"
 )
 
 type EchoHandler struct {
@@ -31,6 +32,10 @@ func (h *EchoHandler) HookInitialize(database map[string]interface{}) {
 
 // サーバ停止時のフック
 func (h *EchoHandler) HookDestroy(database map[string]interface{}) {
+}
+
+func (h *EchoHandler) HookDisconnect(conn net.Conn) {
+
 }
 
 // アクション実行前に実行されるフック。セッションに数を足しているサンプル
