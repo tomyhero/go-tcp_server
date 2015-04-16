@@ -34,7 +34,7 @@ func (h *EchoHandler) HookInitialize(database map[string]interface{}) {
 func (h *EchoHandler) HookDestroy(database map[string]interface{}) {
 }
 
-func (h *EchoHandler) HookDisconnect(conn net.Conn) {
+func (h *EchoHandler) HookDisconnect(conn net.Conn, database map[string]interface{}, conns map[net.Conn]interface{}) {
 
 }
 

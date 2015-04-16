@@ -55,7 +55,7 @@ func (h *ChatHandler) HookBeforeExecute(c *context.Context) {
 
 func (h *ChatHandler) HookAfterExecute(c *context.Context) {
 }
-func (h *ChatHandler) HookDisconnect(conn net.Conn) {
+func (h *ChatHandler) HookDisconnect(conn net.Conn, database map[string]interface{}, conns map[net.Conn]interface{}) {
 
 }
 

@@ -21,7 +21,7 @@ type IHandler interface {
 	HookDestroy(database map[string]interface{})
 	HookBeforeExecute(c *Context)
 	HookAfterExecute(c *Context)
-	HookDisconnect(conn net.Conn)
+	HookDisconnect(conn net.Conn, database map[string]interface{}, conns map[net.Conn]interface{})
 }
 
 type IAuthorizer interface {

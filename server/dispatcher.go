@@ -70,8 +70,8 @@ func (d *Dispatcher) HookDestroy(database map[string]interface{}) {
 		handler.HookDestroy(database)
 	}
 }
-func (d *Dispatcher) HookDisconnect(conn net.Conn) {
+func (d *Dispatcher) HookDisconnect(conn net.Conn, database map[string]interface{}, conns map[net.Conn]interface{}) {
 	for _, handler := range d.Handlers {
-		handler.HookDisconnect(conn)
+		handler.HookDisconnect(conn, database, conns)
 	}
 }
