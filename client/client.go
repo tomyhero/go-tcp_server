@@ -3,6 +3,7 @@ package client
 import (
 	. "github.com/tomyhero/go-tcp_server/context"
 	"net"
+	"time"
 )
 
 type Client struct {
@@ -29,6 +30,8 @@ func (c *Client) Send(req *CData) error {
 }
 
 func (c *Client) Receive() (*CData, error) {
+	// XXX
+	c.conn.SetReadDeadline(time.Now().Add(time.Second * time.Duration(2)))
 	data, err := c.CDataManager.Receive(c.conn)
 	if err != nil {
 		return nil, err

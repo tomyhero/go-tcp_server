@@ -45,7 +45,7 @@ func NewChatHandler() *ChatHandler {
 
 // チャットサーバのHOOK。必要に応じて活用。
 
-func (h *ChatHandler) HookInitialize(database map[string]interface{}) {
+func (h *ChatHandler) HookInitialize(database map[string]interface{}, conns map[net.Conn]interface{}) {
 }
 func (h *ChatHandler) HookDestroy(database map[string]interface{}) {
 }

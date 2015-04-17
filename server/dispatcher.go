@@ -59,10 +59,10 @@ func (d *Dispatcher) AfterExecute(c *context.Context, cmd string) {
 	handler.HookAfterExecute(c)
 }
 
-func (d *Dispatcher) HookInitialize(database map[string]interface{}) {
+func (d *Dispatcher) HookInitialize(database map[string]interface{}, conns map[net.Conn]interface{}) {
 	for _, handler := range d.Handlers {
 		database[handler.Prefix()] = map[string]interface{}{}
-		handler.HookInitialize(database)
+		handler.HookInitialize(database, conns)
 	}
 }
 func (d *Dispatcher) HookDestroy(database map[string]interface{}) {

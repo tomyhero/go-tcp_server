@@ -27,7 +27,7 @@ func NewEchoHandler() *EchoHandler {
 }
 
 // サーバ初期化時のフック
-func (h *EchoHandler) HookInitialize(database map[string]interface{}) {
+func (h *EchoHandler) HookInitialize(database map[string]interface{}, conns map[net.Conn]interface{}) {
 }
 
 // サーバ停止時のフック

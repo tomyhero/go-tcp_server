@@ -91,7 +91,7 @@ func (s *Server) Run() {
 		s.dispatcher.HookDestroy(s.database)
 	}()
 
-	s.dispatcher.HookInitialize(s.database)
+	s.dispatcher.HookInitialize(s.database, s.conns)
 	ln.SetDeadline(time.Now().Add(time.Second * time.Duration(s.Config.AcceptWaitingTime)))
 
 	for {
